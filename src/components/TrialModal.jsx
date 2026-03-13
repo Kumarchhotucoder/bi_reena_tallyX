@@ -63,17 +63,12 @@ const TrialModal = () => {
             const result = await res.json();
 
             if (result.success) {
-                localStorage.setItem('tallyx_token', result.token);
-                localStorage.setItem('tallyx_user_name', result.name);
-                localStorage.setItem('tallyx_company_name', result.companyName || result.name || 'My Company');
-                localStorage.setItem('tallyx_user_email', result.email);
+                // Remove automatic login
+                // localStorage.setItem('tallyx_token', result.token);
 
                 setIsSubmitted(true);
                 setIsSubmitting(false);
-                setTimeout(() => {
-                    handleClose();
-                    window.location.assign('/dashboard');
-                }, 2000);
+                // No more automatic redirect
             } else {
                 setError(result.message || 'Registration failed. User may already exist.');
                 setIsSubmitting(false);
@@ -100,9 +95,20 @@ const TrialModal = () => {
 
                 {isSubmitted ? (
                     <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-                        <CheckCircle size={72} style={{ color: '#ec4899', marginBottom: '1.5rem' }} />
-                        <h3 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'white' }}>Welcome Aboard!</h3>
-                        <p style={{ color: '#cbd5e1', fontSize: '1.1rem' }}>Your 14-day free access to BiReena TallyX has been created. Check your email for login details.</p>
+                        <CheckCircle size={72} style={{ color: '#10b981', marginBottom: '1.5rem' }} />
+                        <h3 style={{ fontSize: '2rem', marginBottom: '1rem', color: 'white' }}>Account Created!</h3>
+                        <p style={{ color: '#cbd5e1', fontSize: '1.1rem', marginBottom: '2rem' }}>Your account is ready. Please sign in with your email and password to access the dashboard.</p>
+                        <button
+                            onClick={() => {
+                                handleClose();
+                                setTimeout(() => window.dispatchEvent(new Event('openSignInModal')), 300);
+                            }}
+                            className="trial-modal-submit"
+                            style={{ maxWidth: '300px', margin: '0 auto' }}
+                        >
+                            <span>Sign In Now</span>
+                            <ArrowRight size={18} className="trial-btn-icon" />
+                        </button>
                     </div>
                 ) : (
                     <>

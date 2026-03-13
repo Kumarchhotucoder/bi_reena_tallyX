@@ -65,7 +65,6 @@ router.post('/', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 companyName: user.companyName,
-                token: generateToken(user._id),
             });
         } else {
             res.status(400).json({ success: false, message: 'Invalid user data' });

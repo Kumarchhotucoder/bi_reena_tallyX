@@ -15,16 +15,42 @@ const Dashboard = () => {
   const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: 'My Company' });
 
   useEffect(() => {
-    const token = localStorage.getItem('tallyx_token');
-    if (!token) {
-      window.location.assign('/');
-    } else {
-      const name = localStorage.getItem('tallyx_user_name') || 'Admin User';
-      const email = localStorage.getItem('tallyx_user_email') || 'admin@bireena.com';
-      const companyName = localStorage.getItem('tallyx_company_name') || 'My Company';
-      const initials = companyName.substring(0, 2).toUpperCase();
-      setUser({ name, email, initials, companyName });
-    }
+    const fetchUser = async () => {
+      const token = localStorage.getItem('tallyx_token');
+      if (!token) {
+        window.location.assign('/');
+        return;
+      }
+
+      try {
+        const res = await fetch('http://localhost:5001/api/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        
+        if (data.success && data.user) {
+          const name = data.user.name || 'Admin User';
+          const email = data.user.email || 'admin@bireena.com';
+          const companyName = data.user.companyName || 'My Company';
+          const initials = companyName.substring(0, 2).toUpperCase();
+          setUser({ name, email, initials, companyName });
+        } else {
+          // Token is invalid or expired
+          localStorage.removeItem('tallyx_token');
+          window.location.assign('/');
+        }
+      } catch (err) {
+        console.error('Auth verification failed:', err);
+        // On network error just fallback to localStorage for now
+        const name = localStorage.getItem('tallyx_user_name') || 'Admin User';
+        const email = localStorage.getItem('tallyx_user_email') || 'admin@bireena.com';
+        const companyName = localStorage.getItem('tallyx_company_name') || 'My Company';
+        const initials = companyName.substring(0, 2).toUpperCase();
+        setUser({ name, email, initials, companyName });
+      }
+    };
+
+    fetchUser();
 
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {

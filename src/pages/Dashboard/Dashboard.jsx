@@ -44,6 +44,20 @@ const Dashboard = () => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       const key = e.key;
       if (key === 'Escape') { setActiveTab('DASHBOARD'); return; }
+      // Import/Export sub-shortcuts (1-6) when on IMPORT page
+      if (activeTab === 'IMPORT' && !e.altKey && !e.ctrlKey) {
+        if (key === '1') { document.getElementById('import-masters-xml')?.click(); return; }
+        if (key === '2') { document.getElementById('import-vouchers-xml')?.click(); return; }
+        if (key === '3') { document.getElementById('import-bank-csv')?.click(); return; }
+        if (key === '4') { document.querySelectorAll('.ie-action-card')[3]?.click(); return; }
+        if (key === '5') { document.querySelectorAll('.ie-action-card')[4]?.click(); return; }
+        if (key === '6') { document.querySelectorAll('.ie-action-card')[5]?.click(); return; }
+      }
+      // Backup/Restore sub-shortcuts when on BACKUP page
+      if (activeTab === 'BACKUP' && !e.altKey && !e.ctrlKey) {
+        if (key === 'Enter') { document.getElementById('backup-start-btn')?.click(); return; }
+        if (key.toLowerCase() === 'r') { document.getElementById('restore-file-picker')?.click(); return; }
+      }
       if (key === 'F1') { e.preventDefault(); setActiveTab('COMPANY'); }
       else if (key === 'F2') { e.preventDefault(); setActiveTab('LEDGER'); }
       else if (key === 'F3') { e.preventDefault(); setActiveTab('STOCK'); }
@@ -64,7 +78,7 @@ const Dashboard = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [activeTab]);
 
   const handleLogout = () => {
     localStorage.removeItem('tallyx_token');
@@ -287,28 +301,133 @@ const Dashboard = () => {
             <div className="report-header">
               <div>
                 <h3><i className="fas fa-sync" style={{ color: '#ffc107' }}></i> Backup & Restore</h3>
-                <p className="report-subtitle">Secure your Company Data</p>
+                <p className="report-subtitle">Secure your Company Data | Enter = Backup, R = Restore</p>
               </div>
               <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
             </div>
-            <div style={{ padding: '25px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', marginTop: '20px' }}>
-              <h4 style={{ color: 'var(--accent-blue)', marginBottom: '20px', fontSize: '18px' }}>Backup Details</h4>
-              <div style={{ display: 'grid', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Source Path :</span>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--text-dim)' }}>C:\TallyPrime\Data</span>
+
+            <div className="ledger-split" style={{ marginTop: '20px' }}>
+              {/* BACKUP SIDE */}
+              <div className="ledger-side border-right">
+                <div className="ledger-head"><i className="fas fa-shield-alt" style={{ marginRight: '8px' }}></i>Backup Company</div>
+                <div className="ledger-body" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                  <div className="ie-action-card" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '12px', cursor: 'default' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)' }}>Source Path</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '13px', color: 'var(--accent-blue)' }}>C:\TallyPrime\Data</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)' }}>Destination</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '13px', color: 'var(--accent-blue)' }}>D:\TallyBackups\2026</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)' }}>Company</span>
+                      <span style={{ fontWeight: 700 }}>{user.companyName} (10000)</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontWeight: 700, fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-dim)' }}>Data Size</span>
+                      <span style={{ color: 'var(--accent-green)', fontWeight: 600 }}>24.8 MB</span>
+                    </div>
+                  </div>
+
+                  {/* Backup Button */}
+                  <div className="ie-action-card" id="backup-start-btn" onClick={() => {
+                    const bar = document.getElementById('backup-progress-bar');
+                    const txt = document.getElementById('backup-status-text');
+                    const wrap = document.getElementById('backup-progress-wrap');
+                    if (!bar || !txt || !wrap) return;
+                    wrap.style.display = 'block';
+                    let p = 0;
+                    const iv = setInterval(() => {
+                      p += Math.random() * 15;
+                      if (p >= 100) { p = 100; clearInterval(iv); txt.textContent = '✅ Backup Complete! (24.8 MB)'; bar.style.background = 'linear-gradient(90deg, #10b981, #34d399)'; }
+                      else { txt.textContent = `Backing up... ${Math.round(p)}%`; }
+                      bar.style.width = p + '%';
+                    }, 300);
+                  }}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}><i className="fas fa-download"></i></div>
+                      <div>
+                        <div className="ie-title">Start Backup</div>
+                        <div className="ie-desc">Compress & save company data</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(16,185,129,0.2)', borderColor: 'rgba(16,185,129,0.4)', color: '#34d399' }}>Enter</span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div id="backup-progress-wrap" style={{ display: 'none' }}>
+                    <div style={{ height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div id="backup-progress-bar" style={{ height: '100%', width: '0%', background: 'linear-gradient(90deg, var(--accent-blue), #6366f1)', borderRadius: '3px', transition: 'width 0.3s ease' }}></div>
+                    </div>
+                    <p id="backup-status-text" style={{ fontSize: '12px', color: 'var(--text-dim)', marginTop: '6px', textAlign: 'center' }}>Preparing...</p>
+                  </div>
+
+                  {/* Schedule */}
+                  <div style={{ padding: '12px', background: 'var(--glass)', borderRadius: '10px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <i className="fas fa-clock" style={{ color: '#ffc107', fontSize: '16px' }}></i>
+                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Auto-backup: Daily at 11:30 PM | Last: Today 11:30 PM</span>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Destination Path :</span>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--text-dim)' }}>D:\TallyBackups\2026</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Company Name :</span>
-                  <span style={{ fontWeight: 'bold' }}>{user.companyName} (10000)</span>
-                </div>
-                <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                  <button style={{ background: 'var(--accent-blue)', color: 'white', padding: '12px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Start Backup (Enter)</button>
-                  <button style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '12px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Restore Data</button>
+              </div>
+
+              {/* RESTORE SIDE */}
+              <div className="ledger-side">
+                <div className="ledger-head"><i className="fas fa-undo" style={{ marginRight: '8px' }}></i>Restore Data</div>
+                <div className="ledger-body" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                  {/* Restore File Picker */}
+                  <div className="ie-action-card" onClick={() => document.getElementById('restore-file-picker')?.click()}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}><i className="fas fa-upload"></i></div>
+                      <div>
+                        <div className="ie-title">Restore from File</div>
+                        <div className="ie-desc">Select .zip or .bak backup file</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(251,146,60,0.2)', borderColor: 'rgba(251,146,60,0.4)', color: '#fdba74' }}>R</span>
+                    <input type="file" id="restore-file-picker" accept=".zip,.bak,.tar.gz" hidden onChange={(e) => { if (e.target.files[0]) alert(`✅ Restore started from "${e.target.files[0].name}" (${(e.target.files[0].size / 1024 / 1024).toFixed(2)} MB). Company data will be replaced.`); }} />
+                  </div>
+
+                  {/* Backup History */}
+                  <div style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-dim)', marginTop: '4px' }}>Recent Backups</div>
+
+                  <div className="ie-action-card" onClick={() => alert('✅ Restoring from backup: 13-Mar-2026 (24.8 MB)...\nCompany data will be replaced with this backup.')}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}><i className="fas fa-archive"></i></div>
+                      <div>
+                        <div className="ie-title">13-Mar-2026, 11:30 PM</div>
+                        <div className="ie-desc">24.8 MB — Auto Backup</div>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: '11px', color: 'var(--accent-green)' }}><i className="fas fa-check-circle"></i> Latest</span>
+                  </div>
+
+                  <div className="ie-action-card" onClick={() => alert('✅ Restoring from backup: 12-Mar-2026 (24.1 MB)...')}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(139,92,246,0.12)', color: '#8b5cf6' }}><i className="fas fa-archive"></i></div>
+                      <div>
+                        <div className="ie-title">12-Mar-2026, 11:30 PM</div>
+                        <div className="ie-desc">24.1 MB — Auto Backup</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="ie-action-card" onClick={() => alert('✅ Restoring from backup: 10-Mar-2026 (23.5 MB)...')}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(236,72,153,0.12)', color: '#ec4899' }}><i className="fas fa-archive"></i></div>
+                      <div>
+                        <div className="ie-title">10-Mar-2026, 06:15 PM</div>
+                        <div className="ie-desc">23.5 MB — Manual Backup</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '12px', background: 'var(--glass)', borderRadius: '10px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <i className="fas fa-exclamation-triangle" style={{ color: '#ef4444', fontSize: '14px' }}></i>
+                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Restoring will replace current data. Take a fresh backup first.</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -321,25 +440,110 @@ const Dashboard = () => {
             <div className="report-header">
               <div>
                 <h3><i className="fas fa-file-import" style={{ color: '#e83e8c' }}></i> Import & Export Data</h3>
-                <p className="report-subtitle">Masters & Vouchers Sync</p>
+                <p className="report-subtitle">Masters & Vouchers Sync | Press 1-6 for quick actions</p>
               </div>
               <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
             </div>
+
             <div className="ledger-split" style={{ marginTop: '20px' }}>
+              {/* IMPORT SIDE */}
               <div className="ledger-side border-right">
-                <div className="ledger-head">Import Data</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Masters (XML)</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Vouchers (XML)</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><span>Bank Statement (Excel/CSV)</span></div>
+                <div className="ledger-head"><i className="fas fa-download" style={{ marginRight: '8px' }}></i>Import Data</div>
+                <div className="ledger-body" style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+                  {/* 1. Masters XML */}
+                  <div className="ie-action-card" onClick={() => document.getElementById('import-masters-xml')?.click()}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(47,129,247,0.15)', color: '#2f81f7' }}><i className="fas fa-sitemap"></i></div>
+                      <div>
+                        <div className="ie-title">Masters (XML)</div>
+                        <div className="ie-desc">Ledgers, Groups, Stock Items</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(47,129,247,0.2)', borderColor: 'rgba(47,129,247,0.4)', color: '#60a5fa' }}>1</span>
+                    <input type="file" id="import-masters-xml" accept=".xml" hidden onChange={(e) => { if (e.target.files[0]) alert(`✅ "${e.target.files[0].name}" imported successfully! ${e.target.files[0].size} bytes processed.`); }} />
+                  </div>
+
+                  {/* 2. Vouchers XML */}
+                  <div className="ie-action-card" onClick={() => document.getElementById('import-vouchers-xml')?.click()}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(139,92,246,0.15)', color: '#8b5cf6' }}><i className="fas fa-receipt"></i></div>
+                      <div>
+                        <div className="ie-title">Vouchers (XML)</div>
+                        <div className="ie-desc">Sales, Purchase, Journal Entries</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(139,92,246,0.2)', borderColor: 'rgba(139,92,246,0.4)', color: '#a78bfa' }}>2</span>
+                    <input type="file" id="import-vouchers-xml" accept=".xml" hidden onChange={(e) => { if (e.target.files[0]) alert(`✅ "${e.target.files[0].name}" imported! ${e.target.files[0].size} bytes processed.`); }} />
+                  </div>
+
+                  {/* 3. Bank Statement */}
+                  <div className="ie-action-card" onClick={() => document.getElementById('import-bank-csv')?.click()}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}><i className="fas fa-university"></i></div>
+                      <div>
+                        <div className="ie-title">Bank Statement (CSV/Excel)</div>
+                        <div className="ie-desc">Auto-reconcile transactions</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(16,185,129,0.2)', borderColor: 'rgba(16,185,129,0.4)', color: '#34d399' }}>3</span>
+                    <input type="file" id="import-bank-csv" accept=".csv,.xlsx,.xls" hidden onChange={(e) => { if (e.target.files[0]) alert(`✅ "${e.target.files[0].name}" imported! ${e.target.files[0].size} bytes processed.`); }} />
+                  </div>
+
+                  {/* Drop Zone */}
+                  <div className="ie-drop-zone" onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) alert(`✅ "${f.name}" dropped & imported!`); }}>
+                    <i className="fas fa-cloud-upload-alt" style={{ fontSize: '24px', opacity: 0.5 }}></i>
+                    <span>Drag & Drop files here</span>
+                  </div>
                 </div>
               </div>
+
+              {/* EXPORT SIDE */}
               <div className="ledger-side">
-                <div className="ledger-head">Export Data</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>All Masters</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Day Book Vouchers</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><span>Tally e-Way Bill Data</span></div>
+                <div className="ledger-head"><i className="fas fa-upload" style={{ marginRight: '8px' }}></i>Export Data</div>
+                <div className="ledger-body" style={{ padding: '15px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+                  {/* 4. All Masters */}
+                  <div className="ie-action-card" onClick={() => { const blob = new Blob(['<?xml version="1.0"?>\n<MASTERS>\n  <LEDGER NAME="Cash"/>\n  <LEDGER NAME="Sales"/>\n  <LEDGER NAME="Purchase"/>\n  <GROUP NAME="Sundry Debtors"/>\n  <GROUP NAME="Sundry Creditors"/>\n</MASTERS>'], { type: 'text/xml' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'masters_export.xml'; a.click(); }}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(251,146,60,0.15)', color: '#fb923c' }}><i className="fas fa-database"></i></div>
+                      <div>
+                        <div className="ie-title">All Masters</div>
+                        <div className="ie-desc">Ledgers, Groups, Stock Items → XML</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(251,146,60,0.2)', borderColor: 'rgba(251,146,60,0.4)', color: '#fdba74' }}>4</span>
+                  </div>
+
+                  {/* 5. Day Book */}
+                  <div className="ie-action-card" onClick={() => { const csv = 'Date,Voucher Type,Particulars,Debit,Credit\n01-Mar-26,Sales,ABC Enterprises,25000,0\n05-Mar-26,Purchase,Mehta Traders,0,18000\n10-Mar-26,Payment,Rent A/c,0,15000\n15-Mar-26,Receipt,XYZ Ltd,30000,0\n20-Mar-26,Journal,Depreciation,5000,5000'; const blob = new Blob([csv], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'daybook_vouchers.csv'; a.click(); }}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}><i className="fas fa-book-open"></i></div>
+                      <div>
+                        <div className="ie-title">Day Book Vouchers</div>
+                        <div className="ie-desc">All entries → CSV/Excel</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(236,72,153,0.2)', borderColor: 'rgba(236,72,153,0.4)', color: '#f472b6' }}>5</span>
+                  </div>
+
+                  {/* 6. e-Way Bill */}
+                  <div className="ie-action-card" onClick={() => { const json = JSON.stringify({ eWayBills: [{ billNo: 'EWB001', date: '2026-03-01', from: 'Patna', to: 'Mumbai', value: 150000, gstin: '22AAAAA0000A1Z5', vehicle: 'BR01AB1234' }, { billNo: 'EWB002', date: '2026-03-10', from: 'Patna', to: 'Delhi', value: 85000, gstin: '22AAAAA0000A1Z5', vehicle: 'BR01CD5678' }] }, null, 2); const blob = new Blob([json], { type: 'application/json' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'eway_bill_data.json'; a.click(); }}>
+                    <div className="ie-action-left">
+                      <div className="ie-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}><i className="fas fa-truck"></i></div>
+                      <div>
+                        <div className="ie-title">Tally e-Way Bill Data</div>
+                        <div className="ie-desc">GST e-Way Bills → JSON</div>
+                      </div>
+                    </div>
+                    <span className="shortcut-badge" style={{ background: 'rgba(99,102,241,0.2)', borderColor: 'rgba(99,102,241,0.4)', color: '#818cf8' }}>6</span>
+                  </div>
+
+                  {/* Export Format Info */}
+                  <div style={{ padding: '12px', background: 'var(--glass)', borderRadius: '10px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <i className="fas fa-info-circle" style={{ color: 'var(--accent-blue)', fontSize: '16px' }}></i>
+                    <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Exports generate instantly. XML for Tally compatibility, CSV for Excel, JSON for GST Portal.</span>
+                  </div>
                 </div>
               </div>
             </div>

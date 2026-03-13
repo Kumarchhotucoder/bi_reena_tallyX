@@ -6,13 +6,18 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(11, 17, 32, 0.6);
-    backdrop-filter: blur(15px);
+    background: rgba(11, 17, 32, 0.85);
+    backdrop-filter: blur(25px);
     /* Strong blur for MacOS effect */
     z-index: 10000;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
+    /* Prevent vertical centering from cutting off top */
     justify-content: center;
+    overflow-y: auto;
+    /* Enable scrolling */
+    padding: 2rem 1rem;
+    /* Add padding to prevent sticking to edges */
     animation: trialFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
@@ -23,10 +28,12 @@
 .trial-modal-content {
     background: rgba(15, 23, 42, 0.7);
     border-radius: 28px;
-    width: 90%;
-    max-width: 580px;
+    width: 100%;
+    max-width: 680px;
     padding: 3rem;
     position: relative;
+    margin: auto;
+    /* Centers when smaller than viewport */
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
     transform-origin: bottom center;
@@ -232,6 +239,15 @@
     box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
 }
 
+.trial-field input:-webkit-autofill,
+.trial-field input:-webkit-autofill:hover,
+.trial-field input:-webkit-autofill:focus,
+.trial-field input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #0f172a inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
 .trial-field input::placeholder {
     color: #475569;
 }
@@ -304,4 +320,123 @@
     .trial-modal-header h2 {
         font-size: 1.8rem;
     }
+}
+
+/* ── Premium Error Notification ── */
+
+@keyframes errorSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes errorGlowPulse {
+
+    0%,
+    100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+.trial-error-notification {
+    position: relative;
+    z-index: 2;
+    margin-bottom: 1.25rem;
+    border-radius: 16px;
+    padding: 2px;
+    /* Gradient border thickness */
+    background: linear-gradient(135deg, #ef4444 0%, #fb923c 50%, #ec4899 100%);
+    animation: errorSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    box-shadow:
+        0 8px 32px rgba(239, 68, 68, 0.15),
+        0 0 0 1px rgba(239, 68, 68, 0.1);
+    overflow: hidden;
+}
+
+.trial-error-glow {
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(239, 68, 68, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: errorGlowPulse 3s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.trial-error-content {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    /* Slightly less than parent for gradient border effect */
+    background: rgba(15, 23, 42, 0.92);
+    backdrop-filter: blur(12px);
+    position: relative;
+    z-index: 1;
+}
+
+.trial-error-icon-wrap {
+    min-width: 100px;
+    height: 40px;
+    border-radius: 10px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    padding: 0 10px;
+}
+
+.trial-error-logo {
+    height: 28px;
+    object-fit: contain;
+}
+
+.trial-error-text {
+    color: #fca5a5;
+    font-weight: 600;
+    font-size: 0.88rem;
+    flex: 1;
+    letter-spacing: 0.2px;
+    line-height: 1.4;
+}
+
+.trial-error-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.trial-error-close:hover {
+    background: #ef4444;
+    color: #ffffff;
+    border-color: #ef4444;
+    transform: rotate(90deg);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }

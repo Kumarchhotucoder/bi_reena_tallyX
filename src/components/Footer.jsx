@@ -1,7 +1,7 @@
 import React from 'react';
 import { Facebook, Instagram, Linkedin, Youtube, ArrowRight, Mail, Phone, MapPin, Sparkles } from 'lucide-react';
 import './Footer.css';
-import logoImage from '../assets/bireena_tallyx_logo.png';
+import logoImage from '../assets/bireena_tallyx_logo_no_bg.png';
 
 const Footer = () => {
     return (

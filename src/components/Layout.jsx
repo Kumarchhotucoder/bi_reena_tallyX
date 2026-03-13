@@ -14,6 +14,8 @@ import WhyChooseUsModal from './why-choose-us/WhyChooseUsModal';
 import AiCopilotModal from './AiCopilotModal';
 import MobileAppModal from './MobileAppModal';
 import PricingModal from './PricingModal';
+import SignInModal from './SignInModal';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 const Layout = ({ children, hidePreFooter }) => {
     const location = useLocation();
@@ -51,6 +53,8 @@ const Layout = ({ children, hidePreFooter }) => {
             <AiCopilotModal />
             <MobileAppModal />
             <PricingModal />
+            <SignInModal />
+            <ForgotPasswordModal />
         </div>
     );
 };

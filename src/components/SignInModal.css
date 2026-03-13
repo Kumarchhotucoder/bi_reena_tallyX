@@ -1,0 +1,277 @@
+/* SignInModal.css - Match TrialModal Aesthetic */
+
+.signin-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(11, 17, 32, 0.6);
+    backdrop-filter: blur(15px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: trialFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.signin-modal-overlay.closing {
+    animation: trialFadeOut 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.signin-modal-content {
+    background: rgba(15, 23, 42, 0.7);
+    border-radius: 28px;
+    width: 90%;
+    max-width: 580px;
+    padding: 3rem;
+    position: relative;
+    box-shadow: 0 40px 80px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transform-origin: bottom center;
+    font-family: var(--font-main, 'Inter', sans-serif);
+    overflow: hidden;
+}
+
+/* Neon Glow Orbs Inside Modal */
+.signin-glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(70px);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.orb-orange {
+    width: 300px;
+    height: 300px;
+    background: #fb923c;
+    top: -50px;
+    right: -50px;
+    animation: trialOrbPulse 6s infinite alternate;
+}
+
+.orb-purple {
+    width: 250px;
+    height: 250px;
+    background: #a855f7;
+    bottom: -50px;
+    left: -50px;
+    animation: trialOrbPulse 8s infinite alternate-reverse;
+}
+
+@keyframes trialOrbPulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.2;
+    }
+
+    100% {
+        transform: scale(1.2);
+        opacity: 0.4;
+    }
+}
+
+.signin-modal-content.opening-scale {
+    animation: genieIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards;
+}
+
+.signin-modal-content.closing-scale {
+    animation: genieOut 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045) forwards;
+}
+
+@keyframes trialFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes trialFadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+/* Close button - Left aligned like Mac OS window controls */
+.signin-modal-close {
+    position: absolute;
+    top: 1.5rem;
+    left: 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.signin-modal-close:hover {
+    background: #ef4444;
+    color: #ffffff;
+    transform: rotate(90deg);
+}
+
+/* Header */
+.signin-modal-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.signin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #fb923c;
+    background: rgba(251, 146, 60, 0.1);
+    padding: 0.4rem 1.25rem;
+    border-radius: 50px;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(251, 146, 60, 0.2);
+}
+
+.signin-modal-header h2 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.5px;
+}
+
+.signin-text-gradient {
+    background: linear-gradient(135deg, #fb923c 0%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.signin-modal-header p {
+    font-size: 1rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+/* Form Styles */
+.signin-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    position: relative;
+    z-index: 2;
+}
+
+.signin-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.signin-field label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.signin-field label svg {
+    color: #fb923c;
+}
+
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    display: none;
+    /* Hide since TrialModal doesn't use inner input icons in the same way */
+}
+
+.input-with-icon input {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    /* Adjusted padding since icon is removed */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 1rem;
+    font-family: inherit;
+    color: #ffffff;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.input-with-icon input:focus {
+    border-color: #fb923c;
+    background: rgba(0, 0, 0, 0.4);
+    box-shadow: 0 0 0 3px rgba(251, 146, 60, 0.15);
+}
+
+.input-with-icon input::placeholder {
+    color: #475569;
+}
+
+/* Submit Button */
+.signin-modal-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1.1rem 2rem;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
+    color: #ffffff;
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 8px 25px rgba(251, 146, 60, 0.3);
+}
+
+.signin-modal-submit:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(251, 146, 60, 0.4);
+    background: linear-gradient(135deg, #fdba74 0%, #fb923c 100%);
+}
+
+.signin-modal-submit:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 600px) {
+    .signin-modal-content {
+        padding: 2.5rem 1.5rem;
+    }
+
+    .signin-modal-header h2 {
+        font-size: 1.8rem;
+    }
+}

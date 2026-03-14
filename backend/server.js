@@ -12,6 +12,8 @@ app.use('/api/companies', require('./routes/companyRoutes'));
 app.use('/api/ledgers', require('./routes/ledgerRoutes'));
 app.use('/api/stocks', require('./routes/stockRoutes'));
 app.use('/api/vouchers', require('./routes/voucherRoutes'));
+app.use('/api/pricing-inquiries', require('./routes/pricingInquiryRoutes'));
+app.use('/api/demo-requests', require('./routes/demoRequestRoutes'));
 app.use('/api', require('./routes/userRoutes'));
 
 app.get('/', (req, res) => res.send('API Running'));

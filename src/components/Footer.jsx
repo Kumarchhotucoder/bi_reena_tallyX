@@ -1,7 +1,7 @@
 import React from 'react';
 import { Facebook, Instagram, Linkedin, Youtube, ArrowRight, Mail, Phone, MapPin, Sparkles } from 'lucide-react';
 import './Footer.css';
-import logoImage from '../assets/bireena_tallyx_logo_no_bg.png';
+import logoImage from '../assets/logo_light.png';
 
 const Footer = () => {
     return (
@@ -56,7 +56,7 @@ const Footer = () => {
                             <ul>
                                 <li className="ft-contact-item">
                                     <Phone size={14} className="ft-contact-icon" />
-                                    <span>+91 91351-55931</span>
+                                    <span>+91 91351-5593</span>
                                 </li>
                                 <li className="ft-contact-item">
                                     <Mail size={14} className="ft-contact-icon" />

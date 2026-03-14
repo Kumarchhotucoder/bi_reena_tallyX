@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
-import logoImage from '../../assets/bireena_tallyx_logo_no_bg.png';
+import logoImage from '../../assets/logo_light.png';
 
 const Dashboard = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -11,8 +11,36 @@ const Dashboard = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [settingsModalTitle, setSettingsModalTitle] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const profileRef = useRef(null);
   const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: 'My Company' });
+
+  // Company Form State
+  const [companyForm, setCompanyForm] = useState({
+    name: '',
+    mailingName: '',
+    address: '',
+    state: '',
+    country: 'India',
+    pin: '',
+    phone: '',
+    email: '',
+    gstinUin: '',
+    fyFrom: '2025-04-01',
+    booksFrom: '2025-04-01',
+    securityPassword: ''
+  });
+
+  const [voucherForm, setVoucherForm] = useState({
+    type: 'PAYMENT',
+    date: new Date().toISOString().split('T')[0],
+    voucherNo: '',
+    ledgerName: '',
+    amount: '',
+    narration: '',
+    entries: []
+  });
 
   useEffect(() => {
     const token = localStorage.getItem('tallyx_token');
@@ -74,6 +102,7 @@ const Dashboard = () => {
       else if (e.altKey && key.toLowerCase() === 'r') { e.preventDefault(); setActiveTab('PRINT'); }
       else if (e.altKey && key.toLowerCase() === 'k') { e.preventDefault(); setActiveTab('BACKUP'); }
       else if (e.altKey && key.toLowerCase() === 'i') { e.preventDefault(); setActiveTab('IMPORT'); }
+      else if (e.altKey && key.toLowerCase() === 'u') { e.preventDefault(); setActiveTab('PROFILE'); }
       else if (e.altKey && key.toLowerCase() === 'l') { e.preventDefault(); handleLogout(); }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -90,6 +119,79 @@ const Dashboard = () => {
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   const toggleMenu = (menu) => {
     setOpenMenus(prev => ({ ...prev, [menu]: !prev[menu] }));
+  };
+
+  const handleCompanyChange = (e) => {
+    const { name, value } = e.target;
+    setCompanyForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCompanySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch('http://localhost:5001/api/companies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(companyForm)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccessMessage(`Company "${data.data.name}" created successfully!`);
+        setShowSuccessModal(true);
+        // Update current user context with new company
+        localStorage.setItem('tallyx_company_name', data.data.name);
+        setUser(prev => ({ ...prev, companyName: data.data.name, initials: data.data.name.substring(0, 2).toUpperCase() }));
+      } else {
+        alert(data.message || 'Error creating company');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Connection error. Is the backend running?');
+    }
+  };
+
+  const handleVoucherChange = (e) => {
+    const { name, value } = e.target;
+    setVoucherForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleVoucherSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch('http://localhost:5001/api/vouchers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ...voucherForm, companyName: user.companyName })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccessMessage(`Voucher created successfully for ${user.companyName}!`);
+        setShowSuccessModal(true);
+        // Clear form after success
+        setVoucherForm({
+          type: 'PAYMENT',
+          date: new Date().toISOString().split('T')[0],
+          voucherNo: '',
+          ledgerName: '',
+          amount: '',
+          narration: '',
+          entries: []
+        });
+      } else {
+        alert(data.message || 'Error creating voucher');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error connecting to backend');
+    }
   };
 
   const renderReport = () => {
@@ -553,39 +655,103 @@ const Dashboard = () => {
       case 'COMPANY':
         return (
           <div className="report-card animate-fade" style={{ gridColumn: '1 / -1' }}>
-            <div className="report-header"><div><h3><i className="fas fa-plus-circle" style={{ color: '#2f81f7' }}></i> Company Creation</h3><p className="report-subtitle">F1 | Create New Company</p></div><button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button></div>
-            <div className="form-grid">
-              <div className="form-group full"><label>Company Name</label><input type="text" placeholder="Enter Company Name" /></div>
-              <div className="form-group"><label>Mailing Name</label><input type="text" placeholder="As shown in reports" /></div>
-              <div className="form-group"><label>Address</label><input type="text" placeholder="Registered Address" /></div>
-              <div className="form-group"><label>State</label><select><option value="">Select State</option><option>Chhattisgarh</option><option>Maharashtra</option><option>Delhi</option><option>Karnataka</option><option>Gujarat</option></select></div>
-              <div className="form-group"><label>Country</label><select><option>India</option><option>USA</option><option>UK</option></select></div>
-              <div className="form-group"><label>PIN Code</label><input type="text" placeholder="490001" /></div>
-              <div className="form-group"><label>Phone No.</label><input type="text" placeholder="+91 " /></div>
-              <div className="form-group"><label>E-Mail</label><input type="email" placeholder="company@email.com" /></div>
-              <div className="form-group"><label>GSTIN / UIN</label><input type="text" placeholder="22AAAAA0000A1Z5" /></div>
-              <div className="form-group"><label>Financial Year From</label><input type="date" defaultValue="2025-04-01" /></div>
-              <div className="form-group"><label>Books Beginning From</label><input type="date" defaultValue="2025-04-01" /></div>
-              <div className="form-group"><label>Security (Password)</label><input type="password" placeholder="Set admin password" /></div>
-              <div className="form-actions"><button className="btn-primary">Accept (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+            <div className="report-header">
+              <div>
+                <h3><i className="fas fa-plus-circle" style={{ color: '#2f81f7' }}></i> Company Creation</h3>
+                <p className="report-subtitle">F1 | Create New Company</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button>
             </div>
+            <form className="form-grid" onSubmit={handleCompanySubmit}>
+              <div className="form-group full">
+                <label>Company Name <span style={{ color: 'red' }}>*</span></label>
+                <input type="text" name="name" value={companyForm.name} onChange={handleCompanyChange} placeholder="Enter Company Name" required />
+              </div>
+              <div className="form-group">
+                <label>Mailing Name</label>
+                <input type="text" name="mailingName" value={companyForm.mailingName} onChange={handleCompanyChange} placeholder="As shown in reports" />
+              </div>
+              <div className="form-group">
+                <label>Address</label>
+                <input type="text" name="address" value={companyForm.address} onChange={handleCompanyChange} placeholder="Registered Address" />
+              </div>
+              <div className="form-group">
+                <label>State</label>
+                <select name="state" value={companyForm.state} onChange={handleCompanyChange}>
+                  <option value="">Select State</option>
+                  <option>Chhattisgarh</option><option>Bihar</option><option>Maharashtra</option><option>Delhi</option><option>Karnataka</option><option>Gujarat</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Country</label>
+                <select name="country" value={companyForm.country} onChange={handleCompanyChange}>
+                  <option>India</option><option>USA</option><option>UK</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>PIN Code</label>
+                <input type="text" name="pin" value={companyForm.pin} onChange={handleCompanyChange} placeholder="490001" />
+              </div>
+              <div className="form-group">
+                <label>Phone No.</label>
+                <input type="text" name="phone" value={companyForm.phone} onChange={handleCompanyChange} placeholder="+91 " />
+              </div>
+              <div className="form-group">
+                <label>E-Mail</label>
+                <input type="email" name="email" value={companyForm.email} onChange={handleCompanyChange} placeholder="company@email.com" />
+              </div>
+              <div className="form-group">
+                <label>GSTIN / UIN</label>
+                <input type="text" name="gstinUin" value={companyForm.gstinUin} onChange={handleCompanyChange} placeholder="22AAAAA0000A1Z5" />
+              </div>
+              <div className="form-group">
+                <label>Financial Year From <span style={{ color: 'red' }}>*</span></label>
+                <input type="date" name="fyFrom" value={companyForm.fyFrom} onChange={handleCompanyChange} required />
+              </div>
+              <div className="form-group">
+                <label>Books Beginning From <span style={{ color: 'red' }}>*</span></label>
+                <input type="date" name="booksFrom" value={companyForm.booksFrom} onChange={handleCompanyChange} required />
+              </div>
+              <div className="form-group">
+                <label>Security (Password)</label>
+                <input type="password" name="securityPassword" value={companyForm.securityPassword} onChange={handleCompanyChange} placeholder="Set admin password" />
+              </div>
+              <div className="form-actions">
+                <button type="submit" className="btn-primary">Accept (Ctrl+A)</button>
+                <button type="button" className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button>
+              </div>
+            </form>
+
+            {showSuccessModal && (
+              <div className="settings-modal-overlay" style={{ zIndex: 1001 }}>
+                <div className="settings-modal-content animate-fade-in" style={{ textAlign: 'center', padding: '40px' }}>
+                  <div style={{ fontSize: '50px', color: '#10b981', marginBottom: '20px' }}><i className="fas fa-check-circle"></i></div>
+                  <h2 style={{ marginBottom: '10px' }}>Congratulations!</h2>
+                  <p style={{ color: 'var(--text-dim)', marginBottom: '30px' }}>{successMessage}</p>
+                  <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                    <button className="btn-primary" onClick={() => { setShowSuccessModal(false); setActiveTab('LEDGER'); }}>Create Ledger (F2)</button>
+                    <button className="btn-secondary" onClick={() => { setShowSuccessModal(false); setActiveTab('DASHBOARD'); }}>Go To Dashboard</button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
 
       case 'LEDGER':
         return (
           <div className="report-card animate-fade" style={{ gridColumn: '1 / -1' }}>
-            <div className="report-header"><div><h3><i className="fas fa-book" style={{ color: '#10b981' }}></i> Ledger Creation</h3><p className="report-subtitle">F2 | Create Ledger Account</p></div><button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button></div>
-            <div className="form-grid">
-              <div className="form-group full"><label>Ledger Name</label><input type="text" placeholder="e.g. Cash A/c, Bank A/c, Sales A/c" /></div>
-              <div className="form-group"><label>Under (Group)</label><select><option value="">Select Group</option><option>Bank Accounts</option><option>Cash-in-Hand</option><option>Sundry Creditors</option><option>Sundry Debtors</option><option>Sales Accounts</option><option>Purchase Accounts</option><option>Direct Expenses</option><option>Indirect Expenses</option><option>Capital A/c</option><option>Duties & Taxes</option><option>Current Liabilities</option><option>Current Assets</option><option>Fixed Assets</option></select></div>
-              <div className="form-group"><label>Opening Balance</label><input type="number" placeholder="0.00" /></div>
-              <div className="form-group"><label>Dr / Cr</label><select><option>Dr</option><option>Cr</option></select></div>
-              <div className="form-group"><label>Mailing Name</label><input type="text" placeholder="Party Name for Invoices" /></div>
-              <div className="form-group"><label>GSTIN</label><input type="text" placeholder="Party GSTIN" /></div>
-              <div className="form-group"><label>PAN / IT No</label><input type="text" placeholder="ABCDE1234F" /></div>
-              <div className="form-group"><label>State</label><select><option value="">Select</option><option>Chhattisgarh</option><option>Maharashtra</option><option>Delhi</option><option>Karnataka</option></select></div>
-              <div className="form-actions"><button className="btn-primary">Accept (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+            <div className="report-header">
+              <div>
+                <h3><i className="fas fa-book" style={{ color: '#10b981' }}></i> Ledger View</h3>
+                <p className="report-subtitle">F2 | View Ledger Accounts for <b>{user.companyName}</b></p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button>
+            </div>
+            <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-dim)' }}>
+              <i className="fas fa-info-circle" style={{ fontSize: '30px', marginBottom: '15px' }}></i>
+              <p>Ledger creation implementation has been removed as per request.</p>
+              <button className="btn-primary" style={{ marginTop: '20px' }} onClick={() => setActiveTab('COMPANY')}>Go back to Company (F1)</button>
             </div>
           </div>
         );
@@ -604,6 +770,134 @@ const Dashboard = () => {
               <div className="form-group"><label>Rate (per unit)</label><input type="number" placeholder="0.00" /></div>
               <div className="form-group"><label>Opening Value (₹)</label><input type="number" placeholder="0.00" /></div>
               <div className="form-actions"><button className="btn-primary">Accept (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+            </div>
+          </div>
+        );
+
+      case 'PROFILE':
+        return (
+          <div className="report-card animate-fade profile-report-wrapper" style={{ gridColumn: '1 / -1', padding: 0, overflow: 'hidden' }}>
+            <div className="profile-container">
+              {/* Profile Local Sidebar */}
+              <div className="profile-sidebar">
+                <div className="profile-sidebar-header">
+                  <h3>Accounts</h3>
+                </div>
+                <nav className="profile-nav">
+                  <div className="profile-nav-item active">
+                    <i className="fas fa-user-circle"></i> Profile
+                    <div className="profile-sub-nav">
+                      <span className="active">• Personal Information</span>
+                      <span>Email Address</span>
+                      <span>Mobile Numbers</span>
+                    </div>
+                  </div>
+                  <div className="profile-nav-item"><i className="fas fa-shield-alt"></i> Security</div>
+                  <div className="profile-nav-item"><i className="fas fa-user-shield"></i> Multi-Factor Auth</div>
+                  <div className="profile-nav-item"><i className="fas fa-cog"></i> Settings</div>
+                  <div className="profile-nav-item"><i className="fas fa-history"></i> Sessions</div>
+                  <div className="profile-nav-item"><i className="fas fa-users"></i> Groups</div>
+                  <div className="profile-nav-item"><i className="fas fa-lock"></i> Privacy</div>
+                  <div className="profile-nav-item"><i className="fas fa-balance-scale"></i> Compliance</div>
+                </nav>
+              </div>
+
+              {/* Profile Main Content */}
+              <div className="profile-main">
+                <div className="profile-main-header">
+                  <h2>Profile</h2>
+                  <button onClick={() => setActiveTab('DASHBOARD')} className="profile-back-btn"><i className="fas fa-times"></i> Esc</button>
+                </div>
+
+                <div className="profile-content-scroll">
+                  {/* Hero Card */}
+                  <div className="profile-hero-card">
+                    <div className="profile-hero-left">
+                      <div className="profile-avatar-large">
+                        {user.initials}
+                      </div>
+                      <div className="profile-hero-info">
+                        <h3>{user.name}</h3>
+                        <p>{user.email}</p>
+                      </div>
+                    </div>
+                    <button className="profile-edit-btn">Edit</button>
+                  </div>
+
+                  {/* Personal Info Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">Personal Information</div>
+                    <div className="profile-info-grid">
+                      <div className="profile-info-item">
+                        <label>Full Name</label>
+                        <p>{user.name}</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Display Name</label>
+                        <p>{user.name}</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Gender</label>
+                        <p>I'd prefer not to say</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Country/Region</label>
+                        <p><span className="flag-icon">🇮🇳</span> India</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>State</label>
+                        <p>Chhattisgarh</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Language</label>
+                        <p>English</p>
+                      </div>
+                      <div className="profile-info-item full-width">
+                        <label>Time zone</label>
+                        <p>(GMT +05:30) India Standard Time ( Asia/Kolkata )</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">My Email Addresses</div>
+                    <p className="profile-section-desc">View and manage the email addresses associated with your account.</p>
+                    <div className="profile-action-card">
+                      <div className="profile-card-left">
+                        <div className="profile-card-icon email-icon"><i className="fas fa-envelope"></i></div>
+                        <div>
+                          <div className="profile-card-title">{user.email}</div>
+                          <div className="profile-card-subtitle">Default Email</div>
+                        </div>
+                      </div>
+                      <div className="profile-card-right">
+                        <span className="status-pill verified">Verified</span>
+                      </div>
+                    </div>
+                    <button className="profile-add-link">+ Add Email Address</button>
+                  </div>
+
+                  {/* Mobile Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">My Mobile Numbers</div>
+                    <p className="profile-section-desc">View and manage all of the mobile numbers associated with your account.</p>
+                    <div className="profile-action-card">
+                      <div className="profile-card-left">
+                        <div className="profile-card-icon phone-icon"><i className="fas fa-phone-alt"></i></div>
+                        <div>
+                          <div className="profile-card-title">+91 96315 767XX</div>
+                          <div className="profile-card-subtitle">Primary Mobile</div>
+                        </div>
+                      </div>
+                      <div className="profile-card-right">
+                        <span className="status-pill verified">Verified</span>
+                      </div>
+                    </div>
+                    <button className="profile-add-link">+ Add Mobile Number</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -633,12 +927,13 @@ const Dashboard = () => {
             <div className="report-header"><div><h3><i className="fas fa-exchange-alt" style={{ color: '#06b6d4' }}></i> Contra Voucher</h3><p className="report-subtitle">F4 | Cash ↔ Bank Transfer</p></div><button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button></div>
             <div className="form-grid">
               <div className="form-group"><label>Voucher No.</label><input type="text" value="C/001" readOnly /></div>
-              <div className="form-group"><label>Date</label><input type="date" defaultValue="2026-03-11" /></div>
-              <div className="form-group"><label>Account (Debit)</label><select><option value="">Select Account</option><option>Cash A/c</option><option>SBI Bank A/c</option><option>HDFC Bank A/c</option><option>PNB Bank A/c</option></select></div>
-              <div className="form-group"><label>Account (Credit)</label><select><option value="">Select Account</option><option>Cash A/c</option><option>SBI Bank A/c</option><option>HDFC Bank A/c</option><option>PNB Bank A/c</option></select></div>
-              <div className="form-group"><label>Amount (₹)</label><input type="number" placeholder="0.00" /></div>
-              <div className="form-group full"><label>Narration</label><input type="text" placeholder="Cash deposited to bank" /></div>
-              <div className="form-actions"><button className="btn-primary">Save (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+              <form className="form-grid" onSubmit={(e) => { e.preventDefault(); setVoucherForm(prev => ({ ...prev, type: 'CONTRA' })); handleVoucherSubmit(e); }}>
+                <div className="form-group"><label>Date</label><input type="date" name="date" value={voucherForm.date} onChange={handleVoucherChange} required /></div>
+                <div className="form-group"><label>Account (Debit)</label><input type="text" name="ledgerName" value={voucherForm.ledgerName} onChange={handleVoucherChange} placeholder="Enter Account Name" required /></div>
+                <div className="form-group"><label>Amount (₹)</label><input type="number" name="amount" value={voucherForm.amount} onChange={handleVoucherChange} placeholder="0.00" required /></div>
+                <div className="form-group full"><label>Narration</label><input type="text" name="narration" value={voucherForm.narration} onChange={handleVoucherChange} placeholder="Cash deposited to bank" /></div>
+                <div className="form-actions"><button type="submit" className="btn-primary">Save (Ctrl+A)</button><button type="button" className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+              </form>
             </div>
           </div>
         );
@@ -647,16 +942,14 @@ const Dashboard = () => {
         return (
           <div className="report-card animate-fade" style={{ gridColumn: '1 / -1' }}>
             <div className="report-header"><div><h3><i className="fas fa-money-bill-wave" style={{ color: '#ef4444' }}></i> Payment Voucher</h3><p className="report-subtitle">F5 | Payment Entry</p></div><button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button></div>
-            <div className="form-grid">
-              <div className="form-group"><label>Voucher No.</label><input type="text" value="P/001" readOnly /></div>
-              <div className="form-group"><label>Date</label><input type="date" defaultValue="2026-03-11" /></div>
-              <div className="form-group"><label>Account (Dr.)</label><select><option value="">Select Expense/Party</option><option>Rent A/c</option><option>Salary A/c</option><option>Electricity A/c</option><option>Sundry Creditors</option><option>Office Expenses</option></select></div>
-              <div className="form-group"><label>Paid Through (Cr.)</label><select><option>Cash A/c</option><option>SBI Bank A/c</option><option>HDFC Bank A/c</option></select></div>
-              <div className="form-group"><label>Amount (₹)</label><input type="number" placeholder="0.00" /></div>
-              <div className="form-group"><label>Mode</label><select><option>Cash</option><option>Cheque</option><option>NEFT/RTGS</option><option>UPI</option></select></div>
-              <div className="form-group full"><label>Narration</label><input type="text" placeholder="Paid to ..." /></div>
-              <div className="form-actions"><button className="btn-primary">Save (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
-            </div>
+            <form className="form-grid" onSubmit={(e) => { e.preventDefault(); setVoucherForm(prev => ({ ...prev, type: 'PAYMENT' })); handleVoucherSubmit(e); }}>
+              <div className="form-group"><label>Voucher No.</label><input type="text" name="voucherNo" value={voucherForm.voucherNo} onChange={handleVoucherChange} placeholder="P/001" /></div>
+              <div className="form-group"><label>Date</label><input type="date" name="date" value={voucherForm.date} onChange={handleVoucherChange} required /></div>
+              <div className="form-group"><label>Account (Dr.)</label><input type="text" name="ledgerName" value={voucherForm.ledgerName} onChange={handleVoucherChange} placeholder="Select Expense/Party" required /></div>
+              <div className="form-group"><label>Amount (₹)</label><input type="number" name="amount" value={voucherForm.amount} onChange={handleVoucherChange} placeholder="0.00" required /></div>
+              <div className="form-group full"><label>Narration</label><input type="text" name="narration" value={voucherForm.narration} onChange={handleVoucherChange} placeholder="Paid to ..." /></div>
+              <div className="form-actions"><button type="submit" className="btn-primary">Save (Ctrl+A)</button><button type="button" className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+            </form>
           </div>
         );
 
@@ -664,16 +957,14 @@ const Dashboard = () => {
         return (
           <div className="report-card animate-fade" style={{ gridColumn: '1 / -1' }}>
             <div className="report-header"><div><h3><i className="fas fa-hand-holding-usd" style={{ color: '#10b981' }}></i> Receipt Voucher</h3><p className="report-subtitle">F6 | Receipt Entry</p></div><button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc</button></div>
-            <div className="form-grid">
-              <div className="form-group"><label>Voucher No.</label><input type="text" value="R/001" readOnly /></div>
-              <div className="form-group"><label>Date</label><input type="date" defaultValue="2026-03-11" /></div>
-              <div className="form-group"><label>Account (Cr.)</label><select><option value="">Select Income/Party</option><option>Sundry Debtors</option><option>Sales A/c</option><option>Interest Received</option><option>Commission Received</option></select></div>
-              <div className="form-group"><label>Received In (Dr.)</label><select><option>Cash A/c</option><option>SBI Bank A/c</option><option>HDFC Bank A/c</option></select></div>
-              <div className="form-group"><label>Amount (₹)</label><input type="number" placeholder="0.00" /></div>
-              <div className="form-group"><label>Mode</label><select><option>Cash</option><option>Cheque</option><option>NEFT/RTGS</option><option>UPI</option></select></div>
-              <div className="form-group full"><label>Narration</label><input type="text" placeholder="Received from ..." /></div>
-              <div className="form-actions"><button className="btn-primary">Save (Ctrl+A)</button><button className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
-            </div>
+            <form className="form-grid" onSubmit={(e) => { e.preventDefault(); setVoucherForm(prev => ({ ...prev, type: 'RECEIPT' })); handleVoucherSubmit(e); }}>
+              <div className="form-group"><label>Voucher No.</label><input type="text" name="voucherNo" value={voucherForm.voucherNo} onChange={handleVoucherChange} placeholder="R/001" /></div>
+              <div className="form-group"><label>Date</label><input type="date" name="date" value={voucherForm.date} onChange={handleVoucherChange} required /></div>
+              <div className="form-group"><label>Account (Cr.)</label><input type="text" name="ledgerName" value={voucherForm.ledgerName} onChange={handleVoucherChange} placeholder="Select Income/Party" required /></div>
+              <div className="form-group"><label>Amount (₹)</label><input type="number" name="amount" value={voucherForm.amount} onChange={handleVoucherChange} placeholder="0.00" required /></div>
+              <div className="form-group full"><label>Narration</label><input type="text" name="narration" value={voucherForm.narration} onChange={handleVoucherChange} placeholder="Received from ..." /></div>
+              <div className="form-actions"><button type="submit" className="btn-primary">Save (Ctrl+A)</button><button type="button" className="btn-secondary" onClick={() => setActiveTab('DASHBOARD')}>Cancel (Esc)</button></div>
+            </form>
           </div>
         );
 
@@ -783,6 +1074,7 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
           <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
           <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+          <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
 
           <MenuItem icon="fas fa-sign-out-alt" label="Logout" shortcut="Alt+L" className="dash-logout-btn" onClick={handleLogout} />
         </nav>

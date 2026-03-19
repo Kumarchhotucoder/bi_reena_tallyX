@@ -4,6 +4,7 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const sendEmail = require('../utils/sendEmail');
+const { protect } = require('../middleware/authMiddleware');
 
 // Generate JWT Test Secret
 const generateToken = (id) => {
@@ -35,6 +36,22 @@ router.post('/login', async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ success: false, message: 'Server error: ' + err.message });
+    }
+});
+
+// @route   GET /api/me
+// @desc    Get current logged in user
+// @access  Private
+router.get('/me', protect, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).select('-password');
+        if (user) {
+            res.json({ success: true, user });
+        } else {
+            res.status(404).json({ success: false, message: 'User not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 

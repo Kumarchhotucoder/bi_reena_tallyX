@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Building2, BookOpen, Users, Receipt, ArrowRight } from 'lucide-react';
 import './TailoredSolutions.css';
 
@@ -51,10 +52,10 @@ const TailoredSolutions = () => {
                             <p className="ts-card-desc">{solution.description}</p>
 
                             <div className="ts-card-footer">
-                                <button className="ts-action-link" onClick={() => window.dispatchEvent(new Event('openSolutionsModal'))}>
+                                <Link to="/services" className="ts-action-link">
                                     <span>Learn more</span>
                                     <ArrowRight size={18} className="ts-arrow" />
-                                </button>
+                                </Link>
                             </div>
                         </div>
                     ))}

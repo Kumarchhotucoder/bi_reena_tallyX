@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import './Features.css';
 import smartInvoiceImg from '../assets/smart-invoice.png';
@@ -81,17 +82,13 @@ const Features = () => {
                             <div className="feature-text-block">
                                 <h3 className="feature-heading">{feat.title}</h3>
                                 <p className="feature-description">{feat.desc}</p>
-                                <a
-                                    href="#"
+                                <Link
+                                    to="/pricing"
                                     className="feat-learn-btn"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        window.dispatchEvent(new Event('openFeatureModal'));
-                                    }}
                                 >
                                     <span>Learn More</span>
                                     <ArrowRight size={15} className="feat-btn-arrow" />
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     ))}

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Services.css';
 import {
     Calculator,
@@ -18,16 +19,12 @@ const ServiceCard = ({ service }) => {
             </div>
             <h3 className="services-card-title">{service.title}</h3>
             <p className="services-card-desc">{service.desc}</p>
-            <a
-                href="#contact"
+            <Link
+                to="/services"
                 className="services-card-btn"
-                onClick={(e) => {
-                    e.preventDefault();
-                    window.dispatchEvent(new Event('openServicesModal'));
-                }}
             >
                 Learn more <ArrowRight size={18} />
-            </a>
+            </Link>
         </div>
     );
 };

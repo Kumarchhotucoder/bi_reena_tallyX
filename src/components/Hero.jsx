@@ -55,7 +55,7 @@ const Hero = () => {
                             window.dispatchEvent(new Event('openDemoModal'));
                         }}
                     >
-                        <Play size={18} fill="#0d6efd" color="#0d6efd" style={{ marginRight: '8px' }} /> Schedule Demo
+                        <Play size={18} fill="white" color="white" style={{ marginRight: '8px' }} /> Schedule Demo
                     </button>
                 </div>
 

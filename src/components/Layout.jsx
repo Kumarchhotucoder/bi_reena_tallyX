@@ -6,11 +6,6 @@ import PreFooter from './prefooter/PreFooter';
 import CustomCursor from './CustomCursor';
 import DemoModal from './DemoModal';
 import TrialModal from './TrialModal';
-import IntegrationModal from './integrations/IntegrationModal';
-import SolutionsModal from './tailored-solutions/SolutionsModal';
-import FeatureModal from './FeatureModal';
-import ServicesModal from './ServicesModal';
-import WhyChooseUsModal from './why-choose-us/WhyChooseUsModal';
 import AiCopilotModal from './AiCopilotModal';
 import MobileAppModal from './MobileAppModal';
 import PricingModal from './PricingModal';
@@ -45,11 +40,6 @@ const Layout = ({ children, hidePreFooter }) => {
             <Footer />
             <DemoModal />
             <TrialModal />
-            <IntegrationModal />
-            <SolutionsModal />
-            <FeatureModal />
-            <ServicesModal />
-            <WhyChooseUsModal />
             <AiCopilotModal />
             <MobileAppModal />
             <PricingModal />

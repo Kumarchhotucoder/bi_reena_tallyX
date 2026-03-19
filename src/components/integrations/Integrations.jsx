@@ -51,11 +51,7 @@ const Integrations = () => {
                                 <div key={`${bank.name}-${index}`} className="app-item">
                                     <div
                                         className="app-card"
-                                        style={{ backgroundColor: '#ffffff', padding: '10px', cursor: 'pointer' }}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            window.dispatchEvent(new Event('openIntegrationModal'));
-                                        }}
+                                        style={{ backgroundColor: '#ffffff', padding: '10px' }}
                                     >
                                         <div className="app-logo" style={{ width: '100%', height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
                                             <BankLogo
@@ -70,17 +66,6 @@ const Integrations = () => {
                             ))}
                         </div>
                     </div>
-
-                    <a
-                        href="#integrations"
-                        className="more-link"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            window.dispatchEvent(new Event('openIntegrationModal'));
-                        }}
-                    >
-                        More Integrations
-                    </a>
                 </div>
             </div>
         </section>

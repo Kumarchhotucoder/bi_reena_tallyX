@@ -1,6 +1,6 @@
 /* Global Variables - VMSlide Clone */
 :root {
-    --color-primary-blue: #0055ff;
+    --color-primary-blue: #ec4899;
     /* Exact blue from button */
     --color-primary-dark: #0044cc;
     --color-bg-blobs: #f5f3ff;
@@ -502,8 +502,8 @@ button {
 }
 
 .btn-white {
-    background: white;
-    color: var(--color-text-dark);
+    background:linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(168, 85, 247, 0.9) 100%);
+   color: white;
     border: 1px solid #e2e8f0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
     transition: all 0.3s ease;
@@ -511,11 +511,8 @@ button {
 
 /* Secondary Button Glow - Warm Orange/Pink */
 .btn-white:hover {
-    border-color: #fb923c;
     transform: translateY(-5px);
-    background: white;
-    box-shadow: 0 0 20px rgba(251, 146, 60, 0.45), 0 0 5px rgba(236, 72, 153, 0.3);
-    color: #ea580c;
+    box-shadow: 0 0 25px rgba(0, 85, 255, 0.6), 0 0 10px rgba(56, 189, 248, 0.6);
 }
 
 .trust-badges {

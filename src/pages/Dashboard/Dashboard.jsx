@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
+import logoImage from '../../assets/logo_light.png';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -10,6 +11,39 @@ const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('DASHBOARD');
   const [dashboardData, setDashboardData] = useState({ ledgers: [], stocks: [], vouchers: [] });
   const [metrics, setMetrics] = useState({ receivables: 0, payables: 0, cash: 0, cashIn: 0, cashOut: 0 });
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [settingsModalTitle, setSettingsModalTitle] = useState('');
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const profileRef = useRef(null);
+  const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: 'My Company' });
+
+  // Company Form State
+  const [companyForm, setCompanyForm] = useState({
+    name: '',
+    mailingName: '',
+    address: '',
+    state: '',
+    country: 'India',
+    pin: '',
+    phone: '',
+    email: '',
+    gstinUin: '',
+    fyFrom: '2025-04-01',
+    booksFrom: '2025-04-01',
+    securityPassword: ''
+  });
+
+  const [voucherForm, setVoucherForm] = useState({
+    type: 'PAYMENT',
+    date: new Date().toISOString().split('T')[0],
+    voucherNo: '',
+    ledgerName: '',
+    amount: '',
+    narration: '',
+    entries: []
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +77,51 @@ const Dashboard = () => {
     };
     fetchData();
   }, []);
+
+
+  // Keyboard Shortcut Handler
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      const key = e.key;
+      if (key === 'Escape') { setActiveTab('DASHBOARD'); return; }
+      // Import/Export sub-shortcuts (1-6) when on IMPORT page
+      if (activeTab === 'IMPORT' && !e.altKey && !e.ctrlKey) {
+        if (key === '1') { document.getElementById('import-masters-xml')?.click(); return; }
+        if (key === '2') { document.getElementById('import-vouchers-xml')?.click(); return; }
+        if (key === '3') { document.getElementById('import-bank-csv')?.click(); return; }
+        if (key === '4') { document.querySelectorAll('.ie-action-card')[3]?.click(); return; }
+        if (key === '5') { document.querySelectorAll('.ie-action-card')[4]?.click(); return; }
+        if (key === '6') { document.querySelectorAll('.ie-action-card')[5]?.click(); return; }
+      }
+      // Backup/Restore sub-shortcuts when on BACKUP page
+      if (activeTab === 'BACKUP' && !e.altKey && !e.ctrlKey) {
+        if (key === 'Enter') { document.getElementById('backup-start-btn')?.click(); return; }
+        if (key.toLowerCase() === 'r') { document.getElementById('restore-file-picker')?.click(); return; }
+      }
+      if (key === 'F1') { e.preventDefault(); setActiveTab('COMPANY'); }
+      else if (key === 'F2') { e.preventDefault(); setActiveTab('LEDGER'); }
+      else if (key === 'F3') { e.preventDefault(); setActiveTab('STOCK'); }
+      else if (key === 'F4') { e.preventDefault(); setActiveTab('CONTRA'); }
+      else if (key === 'F5') { e.preventDefault(); setActiveTab('PAYMENT'); }
+      else if (key === 'F6') { e.preventDefault(); setActiveTab('RECEIPT'); }
+      else if (key === 'F7') { e.preventDefault(); setActiveTab('VOUCHER'); }
+      else if (key === 'F8') { e.preventDefault(); setActiveTab('SALES'); }
+      else if (key === 'F9') { e.preventDefault(); setActiveTab('PURCHASE'); }
+      else if (key === 'F10') { e.preventDefault(); setActiveTab('BANKING'); }
+      else if (e.altKey && key.toLowerCase() === 'g') { e.preventDefault(); setActiveTab('GST'); }
+      else if (e.altKey && key.toLowerCase() === 'p') { e.preventDefault(); setActiveTab('PL'); }
+      else if (e.altKey && key.toLowerCase() === 'b') { e.preventDefault(); setActiveTab('BS'); }
+      else if (e.altKey && key.toLowerCase() === 'r') { e.preventDefault(); setActiveTab('PRINT'); }
+      else if (e.altKey && key.toLowerCase() === 'k') { e.preventDefault(); setActiveTab('BACKUP'); }
+      else if (e.altKey && key.toLowerCase() === 'i') { e.preventDefault(); setActiveTab('IMPORT'); }
+      else if (e.altKey && key.toLowerCase() === 'u') { e.preventDefault(); setActiveTab('PROFILE'); }
+      else if (e.altKey && key.toLowerCase() === 'l') { e.preventDefault(); handleLogout(); }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab]);
+
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
   const toggleMenu = (menu) => {
@@ -109,6 +188,79 @@ const Dashboard = () => {
     borderRight: '1px solid var(--border)',
     padding: '8px',
     background: 'var(--card-bg)'
+  };
+  const handleCompanyChange = (e) => {
+    const { name, value } = e.target;
+    setCompanyForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCompanySubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch('http://localhost:5001/api/companies', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(companyForm)
+      });
+      const data = await response.json();
+      if (data.success) {
+        setSuccessMessage(`Company "${data.data.name}" created successfully!`);
+        setShowSuccessModal(true);
+        // Update current user context with new company
+        localStorage.setItem('tallyx_company_name', data.data.name);
+        setUser(prev => ({ ...prev, companyName: data.data.name, initials: data.data.name.substring(0, 2).toUpperCase() }));
+      } else {
+        alert(data.message || 'Error creating company');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Connection error. Is the backend running?');
+    }
+  };
+
+  const handleVoucherChange = (e) => {
+    const { name, value } = e.target;
+    setVoucherForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleVoucherSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch('http://localhost:5001/api/vouchers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ...voucherForm, companyName: user.companyName })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccessMessage(`Voucher created successfully for ${user.companyName}!`);
+        setShowSuccessModal(true);
+        // Clear form after success
+        setVoucherForm({
+          type: 'PAYMENT',
+          date: new Date().toISOString().split('T')[0],
+          voucherNo: '',
+          ledgerName: '',
+          amount: '',
+          narration: '',
+          entries: []
+        });
+      } else {
+        alert(data.message || 'Error creating voucher');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error connecting to backend');
+    }
+
   };
 
   const renderReport = () => {
@@ -857,6 +1009,135 @@ const Dashboard = () => {
           </div>
         );
 
+      case 'PROFILE':
+        return (
+          <div className="report-card animate-fade profile-report-wrapper" style={{ gridColumn: '1 / -1', padding: 0, overflow: 'hidden' }}>
+            <div className="profile-container">
+              {/* Profile Local Sidebar */}
+              <div className="profile-sidebar">
+                <div className="profile-sidebar-header">
+                  <h3>Accounts</h3>
+                </div>
+                <nav className="profile-nav">
+                  <div className="profile-nav-item active">
+                    <i className="fas fa-user-circle"></i> Profile
+                    <div className="profile-sub-nav">
+                      <span className="active">• Personal Information</span>
+                      <span>Email Address</span>
+                      <span>Mobile Numbers</span>
+                    </div>
+                  </div>
+                  <div className="profile-nav-item"><i className="fas fa-shield-alt"></i> Security</div>
+                  <div className="profile-nav-item"><i className="fas fa-user-shield"></i> Multi-Factor Auth</div>
+                  <div className="profile-nav-item"><i className="fas fa-cog"></i> Settings</div>
+                  <div className="profile-nav-item"><i className="fas fa-history"></i> Sessions</div>
+                  <div className="profile-nav-item"><i className="fas fa-users"></i> Groups</div>
+                  <div className="profile-nav-item"><i className="fas fa-lock"></i> Privacy</div>
+                  <div className="profile-nav-item"><i className="fas fa-balance-scale"></i> Compliance</div>
+                </nav>
+              </div>
+
+              {/* Profile Main Content */}
+              <div className="profile-main">
+                <div className="profile-main-header">
+                  <h2>Profile</h2>
+                  <button onClick={() => setActiveTab('DASHBOARD')} className="profile-back-btn"><i className="fas fa-times"></i> Esc</button>
+                </div>
+
+                <div className="profile-content-scroll">
+                  {/* Hero Card */}
+                  <div className="profile-hero-card">
+                    <div className="profile-hero-left">
+                      <div className="profile-avatar-large">
+                        {user.initials}
+                      </div>
+                      <div className="profile-hero-info">
+                        <h3>{user.name}</h3>
+                        <p>{user.email}</p>
+                      </div>
+                    </div>
+                    <button className="profile-edit-btn">Edit</button>
+                  </div>
+
+                  {/* Personal Info Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">Personal Information</div>
+                    <div className="profile-info-grid">
+                      <div className="profile-info-item">
+                        <label>Full Name</label>
+                        <p>{user.name}</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Display Name</label>
+                        <p>{user.name}</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Gender</label>
+                        <p>I'd prefer not to say</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Country/Region</label>
+                        <p><span className="flag-icon">🇮🇳</span> India</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>State</label>
+                        <p>Chhattisgarh</p>
+                      </div>
+                      <div className="profile-info-item">
+                        <label>Language</label>
+                        <p>English</p>
+                      </div>
+                      <div className="profile-info-item full-width">
+                        <label>Time zone</label>
+                        <p>(GMT +05:30) India Standard Time ( Asia/Kolkata )</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Email Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">My Email Addresses</div>
+                    <p className="profile-section-desc">View and manage the email addresses associated with your account.</p>
+                    <div className="profile-action-card">
+                      <div className="profile-card-left">
+                        <div className="profile-card-icon email-icon"><i className="fas fa-envelope"></i></div>
+                        <div>
+                          <div className="profile-card-title">{user.email}</div>
+                          <div className="profile-card-subtitle">Default Email</div>
+                        </div>
+                      </div>
+                      <div className="profile-card-right">
+                        <span className="status-pill verified">Verified</span>
+                      </div>
+                    </div>
+                    <button className="profile-add-link">+ Add Email Address</button>
+                  </div>
+
+                  {/* Mobile Card */}
+                  <div className="profile-info-section">
+                    <div className="profile-section-title">My Mobile Numbers</div>
+                    <p className="profile-section-desc">View and manage all of the mobile numbers associated with your account.</p>
+                    <div className="profile-action-card">
+                      <div className="profile-card-left">
+                        <div className="profile-card-icon phone-icon"><i className="fas fa-phone-alt"></i></div>
+                        <div>
+                          <div className="profile-card-title">+91 96315 767XX</div>
+                          <div className="profile-card-subtitle">Primary Mobile</div>
+                        </div>
+                      </div>
+                      <div className="profile-card-right">
+                        <span className="status-pill verified">Verified</span>
+                      </div>
+                    </div>
+                    <button className="profile-add-link">+ Add Mobile Number</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+
       default: return null;
     }
   };
@@ -899,11 +1180,12 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" onClick={() => setActiveTab('BS')} />
           
           <div className="nav-label">Utilities</div>
-          <MenuItem icon="fas fa-print" label="Printing & Export" onClick={() => setActiveTab('PRINT')} />
-          <MenuItem icon="fas fa-sync" label="Backup & Restore" onClick={() => setActiveTab('BACKUP')} />
-          <MenuItem icon="fas fa-file-import" label="Import & Export" onClick={() => setActiveTab('IMPORT')} />
-          
-          <MenuItem icon="fas fa-sign-out-alt" label="Logout" onClick={handleLogout} />
+          <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
+          <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
+          <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+          <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
+
+          <MenuItem icon="fas fa-sign-out-alt" label="Logout" shortcut="Alt+L" className="dash-logout-btn" onClick={handleLogout} />
         </nav>
       </aside>
 

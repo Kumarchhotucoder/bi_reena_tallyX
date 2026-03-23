@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Building2, User, Mail, Lock, Sparkles, ArrowRight, CheckCircle, Eye, EyeOff, Globe, MapPin, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
-import logoImage from '../assets/logo_dark.png';
+import logoImage from '../assets/logo.jpeg';
 import './TrialModal.css';
 
 const TrialModal = () => {

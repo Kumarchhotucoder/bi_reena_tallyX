@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
-import logoImage from '../../assets/logo_light.png';
+import logoImage from '../../assets/logo.jpeg';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -1147,7 +1147,7 @@ const Dashboard = () => {
       
       <aside className="sidebar">
         <div className="sidebar-header">
-          <img src="pr.jpeg" alt="BIREENA Tally X" className="app-logo" />
+          <img src={logoImage} alt="BIREENA Tally X" className="app-logo" />
         </div>
         
         <nav className="nav-group">

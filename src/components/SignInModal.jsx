@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, LogIn, Sparkles, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import logoImage from '../assets/bireena_tallyx_logo_no_bg.png';
+import logoImage from '../assets/logo.jpeg';
 import './SignInModal.css';
 
 const SignInModal = () => {

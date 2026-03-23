@@ -10,6 +10,7 @@ const companySchema = new mongoose.Schema({
     phone: String,
     email: String,
     gstinUin: String,
+    pan: String,
     fyFrom: { type: Date, default: '2025-04-01' },
     booksFrom: { type: Date, default: '2025-04-01' },
     securityPassword: { type: String }, // In real app, this should be hashed

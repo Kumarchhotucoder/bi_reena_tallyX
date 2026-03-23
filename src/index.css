@@ -90,7 +90,8 @@ button {
     background-color: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(12px);
     transition: all 0.3s ease;
-    justify-content: space-between;
+    display: flex;
+    align-items: center;
 }
 
 .navbar::after {
@@ -137,25 +138,23 @@ button {
 }
 
 .navbar-logo-img {
-    height: 40px;
-    /* Adjusted for realistic navbar proportions */
+    height: 52px;
     width: auto;
     object-fit: contain;
     display: block;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .navbar-logo-img:hover {
-    transform: translateY(-1px) scale(1.03);
-    /* Subtle premium Glassy glow effect */
-    filter: drop-shadow(0 4px 12px rgba(49, 46, 129, 0.4)) drop-shadow(0 0 15px rgba(6, 182, 212, 0.3));
+    transform: translateY(-2px) scale(1.06);
+    filter: drop-shadow(0 8px 20px rgba(99, 102, 241, 0.4)) brightness(1.1);
 }
 
 .nav-links {
     display: flex;
-    gap: 2.25rem;
-
+    gap: 2.5rem;
+    margin-left: 2rem;
 }
 
 .nav-links a {
@@ -183,10 +182,29 @@ button {
     padding-bottom: 2px;
 }
 
+.mobile-nav-actions {
+    display: none;
+}
+
 .nav-actions {
     display: flex;
     align-items: center;
     gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .nav-actions .demo-btn,
+    .nav-actions .signin-nav-btn {
+        display: none !important;
+    }
+
+    .mobile-nav-actions {
+        display: block;
+        width: 100%;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
 }
 
 .btn-default {
@@ -449,12 +467,13 @@ button {
     position: relative;
     z-index: 2;
     /* Content above bubbles */
-    font-size: 4rem;
+    font-size: clamp(2.5rem, 8vw, 4rem);
     line-height: 1.1;
     font-weight: 800;
     color: var(--color-text-dark);
     margin-bottom: 1.5rem;
     letter-spacing: -1.5px;
+    padding: 0 1rem;
 }
 
 .gradient-text {
@@ -713,6 +732,39 @@ body {
 @media (max-width: 768px) {
     .nav-links {
         display: none;
+        flex-direction: column;
+        position: fixed;
+        top: 85px; /* Adjust based on navbar + gradient bar height */
+        left: 0;
+        width: 100%;
+        background: #ffffff;
+        padding: 2.5rem 2rem;
+        gap: 1.5rem;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+        transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        opacity: 0;
+        transform: translateY(-20px);
+        pointer-events: none;
+    }
+
+    .nav-links.active {
+        display: flex;
+        opacity: 1;
+        transform: translateY(0);
+        pointer-events: all;
+    }
+
+    .nav-links a {
+        font-size: 1.1rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .nav-links a.active-nav-link {
+        border-bottom: 2px solid #6366f1;
     }
 
     /* Mobile menu logic handled in component */
@@ -737,8 +789,19 @@ body {
     }
 
     .hero-left-bubble {
-        width: 300px;
-        left: -150px;
+        width: 200px;
+        left: -100px;
+        opacity: 0.5;
+    }
+
+    .hero-particles {
+        display: none;
+    }
+
+    .blob {
+        width: 280px;
+        height: 280px;
+        filter: blur(40px);
     }
 
     .mobile-menu-btn {

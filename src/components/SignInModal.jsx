@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, LogIn, Sparkles, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
-import logoImage from '../assets/logo.jpeg';
+import logoImage from '../assets/bireena_tallyx_premium_logo.png';
 import './SignInModal.css';
 
 const SignInModal = () => {
@@ -37,22 +37,36 @@ const SignInModal = () => {
         setError('');
 
         try {
-            const res = await fetch('http://localhost:5001/api/login', {
+            const response = await fetch('http://localhost:5001/api/login', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
             });
-            const data = await res.json();
+
+            const data = await response.json();
 
             if (data.success) {
-                // Force a hard redirect
+                // Save real JWT token and user details to localStorage
                 localStorage.setItem('tallyx_token', data.token);
-                localStorage.setItem('tallyx_user_name', data.name || email.split('@')[0]);
-                localStorage.setItem('tallyx_company_name', data.companyName || data.name || 'My Company');
-                localStorage.setItem('tallyx_user_email', email);
-                window.location.assign('/dashboard');
+                localStorage.setItem('tallyx_user_name', data.name);
+                localStorage.setItem('tallyx_company_name', data.companyName);
+                localStorage.setItem('tallyx_user_email', data.email);
+                
+                toast.success('Login Successful! Redirecting...', {
+                    style: {
+                        background: '#1e1b4b',
+                        color: '#fff',
+                        border: '1px solid #10b981',
+                    }
+                });
+
+                setTimeout(() => {
+                    window.location.assign('/dashboard');
+                }, 1000);
             } else {
-                setError(data.message || 'Login failed');
+                setError(data.message || 'Invalid email or password');
                 toast.error(data.message || 'Login failed', {
                     style: {
                         background: '#1e1b4b',
@@ -60,18 +74,18 @@ const SignInModal = () => {
                         border: '1px solid #ef4444',
                     }
                 });
+                setLoading(false);
             }
         } catch (err) {
-            console.error(err);
-            setError('Unable to connect to server. Please try again.');
-            toast.error('Unable to connect to server.', {
+            console.error('Login Error:', err);
+            setError('Server connection failed. Is the backend running?');
+            toast.error('Connection failed', {
                 style: {
                     background: '#1e1b4b',
                     color: '#fff',
                     border: '1px solid #ef4444',
                 }
             });
-        } finally {
             setLoading(false);
         }
     };

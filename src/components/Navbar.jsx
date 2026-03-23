@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, User, Settings, LogOut, LayoutDashboard } from 'lucide-react';
-import logoImage from '../assets/logo.jpeg';
+import logoImage from '../assets/bireena_tallyx_premium_logo.png';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -81,6 +81,37 @@ const Navbar = () => {
                             {label === 'Contact' && <ChevronDown size={14} style={{ marginLeft: 4 }} />}
                         </Link>
                     ))}
+                    <div className="mobile-nav-actions">
+                        <button
+                            className="btn btn-default demo-btn"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setIsMobileMenuOpen(false);
+                                window.dispatchEvent(new Event('openDemoModal'));
+                            }}
+                        >
+                            Schedule a Demo
+                        </button>
+                        <button
+                            className="btn signin-nav-btn"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.9) 0%, rgba(168, 85, 247, 0.9) 100%)',
+                                color: 'white',
+                                padding: '0.8rem 1.4rem',
+                                borderRadius: '9999px',
+                                width: '100%',
+                                marginTop: '1rem',
+                                fontWeight: 700
+                            }}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setIsMobileMenuOpen(false);
+                                window.dispatchEvent(new Event('openSignInModal'));
+                            }}
+                        >
+                            Sign In
+                        </button>
+                    </div>
                 </div>
 
                 <div className="nav-actions">

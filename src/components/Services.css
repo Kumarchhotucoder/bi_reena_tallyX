@@ -60,7 +60,7 @@
 }
 
 .services-headline {
-    font-size: 3rem;
+    font-size: clamp(1.8rem, 5vw, 3rem);
     font-weight: 800;
     color: #0b1121;
     line-height: 1.2;

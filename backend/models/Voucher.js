@@ -11,7 +11,7 @@ const voucherItemSchema = new mongoose.Schema({
 
 const voucherEntrySchema = new mongoose.Schema({
     type: { type: String, enum: ['Dr', 'Cr'] },
-    ledger: { type: mongoose.Schema.Types.ObjectId, ref: 'Ledger' },
+    ledger: String,
     debit: { type: Number, default: 0 },
     credit: { type: Number, default: 0 }
 });
@@ -20,8 +20,8 @@ const voucherSchema = new mongoose.Schema({
     type: { type: String, enum: ['SALES', 'PURCHASE', 'PAYMENT', 'RECEIPT', 'CONTRA', 'JOURNAL'], required: true },
     voucherNo: String,
     date: { type: Date, default: Date.now },
-    party: { type: mongoose.Schema.Types.ObjectId, ref: 'Ledger' }, // For Sales/Purchase
-    ledger: { type: mongoose.Schema.Types.ObjectId, ref: 'Ledger' }, // For Sales/Purchase
+    party: String, // For Sales/Purchase
+    ledger: String, // For Sales/Purchase
     placeOfSupply: String, // For Sales
     supInvNo: String, // For Purchase
     items: [voucherItemSchema],

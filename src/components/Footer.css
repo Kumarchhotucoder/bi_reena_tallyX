@@ -60,7 +60,7 @@
 }
 
 .ft-logo-img {
-    height: 50px;
+    height: 60px;
     /* Adjust for horizontal logo */
     max-width: 100%;
     object-fit: contain;
@@ -429,19 +429,52 @@
         padding: 3rem 1.5rem 0;
     }
 
+    .ft-top {
+        text-align: center;
+    }
+
+    .ft-brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .ft-logo-row {
+        justify-content: center;
+    }
+
+    .ft-social-row {
+        justify-content: center;
+    }
+
     .ft-nav-cols {
         grid-template-columns: 1fr;
         gap: 1.5rem;
+        text-align: center;
+    }
+
+    .ft-nav-col h4::after {
+        left: 50%;
+        transform: translateX(-50%);
     }
 
     .ft-cta-text {
         font-size: 1.3rem;
+        text-align: center;
+        width: 100%;
+    }
+    
+    .ft-cta-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .ft-bottom {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: 0.75rem;
         padding: 1.25rem 0;
+        text-align: center;
     }
 }

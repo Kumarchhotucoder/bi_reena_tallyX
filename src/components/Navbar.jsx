@@ -70,6 +70,13 @@ const Navbar = () => {
                 </div>
 
                 <div className={`nav-links ${isMobileMenuOpen ? 'active' : ''}`}>
+                    <button 
+                        className="mobile-menu-close-inside"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        aria-label="Close menu"
+                    >
+                        <X size={28} />
+                    </button>
                     {navLinks.map(({ label, to }) => (
                         <Link
                             key={to}
@@ -161,8 +168,8 @@ const Navbar = () => {
                     >
                         Sign In
                     </button>
-                    <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
-                        {isMobileMenuOpen ? <X /> : <Menu />}
+                    <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(true)}>
+                        <Menu />
                     </button>
                 </div>
             </div>

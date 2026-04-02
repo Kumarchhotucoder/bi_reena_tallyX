@@ -9,7 +9,6 @@ import './About.css';
 import newTeamImage from '../assets/new_team.png';
 import aboutImg from '../assets/about-fintech.png';
 import reenaContactImg from '../assets/reena_contact.png';
-import ankitImg from '../assets/ankit.png';
 import nehaImg from '../assets/neha.png';
 
 const About = () => {
@@ -48,12 +47,6 @@ const About = () => {
             bio: "Building scalable web applications with React & Firebase. Passionate about problem solving and clean code.",
             photo: nehaImg,
             linkedin: "https://www.linkedin.com/in/deepak-kumar-18999232b/"
-        },
-        {
-            name: "Santosh Kumar", role: "Full Stack Developer", accent: "ab-purple",
-            bio: "Building scalable web applications with React & Firebase. Passionate about problem solving and clean code.",
-            photo: ankitImg,
-            linkedin: "https://www.linkedin.com/in/santosh-kumar-8aa89338b/?originalSubdomain=in"
         }
     ];
 

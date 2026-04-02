@@ -87,7 +87,8 @@ router.post('/', async (req, res) => {
             res.status(400).json({ success: false, message: 'Invalid user data' });
         }
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Server error' });
+        console.error('Signup error:', err);
+        res.status(500).json({ success: false, message: 'Server error: ' + err.message });
     }
 });
 

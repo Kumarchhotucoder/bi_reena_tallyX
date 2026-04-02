@@ -43,10 +43,10 @@ const Hero = () => {
                         className="btn btn-primary btn-xl"
                         onClick={(e) => {
                             e.preventDefault();
-                            window.dispatchEvent(new Event('openTrialModal'));
+                            window.dispatchEvent(new Event('openSignInModal'));
                         }}
                     >
-                        Sign up Now <ArrowRight size={18} className="ml-2" style={{ marginLeft: '8px' }} />
+                        Sign in nowe <ArrowRight size={18} className="ml-2" style={{ marginLeft: '8px' }} />
                     </button>
                     <button
                         className="btn btn-white btn-xl flex-center"

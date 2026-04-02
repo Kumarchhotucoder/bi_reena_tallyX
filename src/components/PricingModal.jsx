@@ -29,41 +29,14 @@ const PricingModal = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        try {
-            const formData = new FormData(e.target);
-            const data = {
-                fullName: formData.get('fullName'),
-                companyName: formData.get('companyName'),
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                interestedPlan: formData.get('interestedPlan'),
-                sourceForm: 'PricingModal'
-            };
-
-            const response = await fetch('http://localhost:5001/api/pricing-inquiries', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                setIsSubmitted(true);
-                setTimeout(() => {
-                    handleClose();
-                }, 3000);
-            } else {
-                const errorData = await response.json();
-                console.error('Failed to submit inquiry:', errorData);
-                alert('Connection failed. Please check your network and try again.');
-            }
-        } catch (error) {
-            console.error('Inquiry submission error:', error);
-            alert('An error occurred while sending your request. Please try again later.');
-        } finally {
+        // Mock submission delay
+        setTimeout(() => {
+            setIsSubmitted(true);
+            setTimeout(() => {
+                handleClose();
+            }, 3000);
             setIsSubmitting(false);
-        }
+        }, 1500);
     };
 
     if (!isOpen) return null;

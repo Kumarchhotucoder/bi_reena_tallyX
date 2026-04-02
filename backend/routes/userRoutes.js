@@ -8,6 +8,8 @@ const { protect } = require('../middleware/authMiddleware');
 
 // Generate JWT Test Secret
 const generateToken = (id) => {
+    console.log('Generating token for user ID:', id);
+    console.log('Using JWT_SECRET for signing:', process.env.JWT_SECRET ? 'Defined' : 'UNDEFINED (Using Fallback)');
     return jwt.sign({ id }, process.env.JWT_SECRET || 'bireena_tallyx_secret_key', {
         expiresIn: '30d',
     });

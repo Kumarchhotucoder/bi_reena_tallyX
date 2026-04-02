@@ -28,40 +28,14 @@ const DemoModal = () => {
         e.preventDefault();
         setIsSubmitting(true);
 
-        try {
-            const formData = new FormData(e.target);
-            const data = {
-                fullName: formData.get('fullName'),
-                companySize: formData.get('companyName'), // Input name is 'companyName' in JSX
-                email: formData.get('email'),
-                phone: formData.get('phone'),
-                sourceForm: 'DemoModal'
-            };
-
-            const response = await fetch('http://localhost:5001/api/demo-requests', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-
-            if (response.ok) {
-                setIsSubmitted(true);
-                setTimeout(() => {
-                    handleClose();
-                }, 3000);
-            } else {
-                const errorData = await response.json();
-                console.error('Failed to book demo:', errorData);
-                alert('Connection failed. Please check your network and try again.');
-            }
-        } catch (error) {
-            console.error('Demo booking error:', error);
-            alert('An error occurred while sending your request. Please try again later.');
-        } finally {
+        // Mock submission delay
+        setTimeout(() => {
+            setIsSubmitted(true);
+            setTimeout(() => {
+                handleClose();
+            }, 3000);
             setIsSubmitting(false);
-        }
+        }, 1500);
     };
 
     if (!isOpen) return null;

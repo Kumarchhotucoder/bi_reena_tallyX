@@ -40,7 +40,7 @@
 }
 
 .wcu-title {
-    font-size: 2.6rem;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
     font-weight: 800;
     line-height: 1.15;
     color: #1e293b;

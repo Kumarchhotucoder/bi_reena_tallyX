@@ -29,32 +29,15 @@ const ResetPasswordPage = () => {
 
         setLoading(true);
 
-        try {
-            const res = await fetch(`http://localhost:5001/api/password/reset/${token}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ password }),
-            });
-
-            const data = await res.json();
-
-            if (data.success) {
-                setMessage('Password reset successfully! You can now log in with your new password.');
-                setTimeout(() => {
-                    navigate('/');
-                    setTimeout(() => window.dispatchEvent(new Event('openSignInModal')), 500);
-                }, 3000);
-            } else {
-                setError(data.message || 'Invalid or expired token. Please request a new link.');
-            }
-        } catch (err) {
-            console.error(err);
-            setError('Unable to connect to server. Please try again.');
-        } finally {
+        // Mock reset delay
+        setTimeout(() => {
+            setMessage('Password reset successfully! You can now log in with your new password.');
             setLoading(false);
-        }
+            setTimeout(() => {
+                navigate('/');
+                setTimeout(() => window.dispatchEvent(new Event('openSignInModal')), 500);
+            }, 3000);
+        }, 1500);
     };
 
     return (

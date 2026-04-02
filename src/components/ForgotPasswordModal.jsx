@@ -40,25 +40,11 @@ const ForgotPasswordModal = () => {
         setError('');
         setMessage('');
 
-        try {
-            const res = await fetch('http://localhost:5001/api/password/forgot', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                setMessage('An email with a reset link has been sent to your address (valid for 10 minutes).');
-            } else {
-                setError(data.message || 'Failed to send email. Please try again.');
-            }
-        } catch (err) {
-            console.error(err);
-            setError('Unable to connect to server. Please try again.');
-        } finally {
+        // Mock submission delay
+        setTimeout(() => {
+            setMessage('An email with a reset link has been sent to your address (valid for 10 minutes).');
             setLoading(false);
-        }
+        }, 1500);
     };
 
     if (!isOpen) return null;

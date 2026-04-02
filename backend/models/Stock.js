@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const stockSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
     group: String,
     uom: String,
     hsn: String,
@@ -13,5 +13,7 @@ const stockSchema = new mongoose.Schema({
     openingValue: { type: Number, default: 0 },
     companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
 }, { timestamps: true });
+
+stockSchema.index({ name: 1, companyId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Stock', stockSchema);

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Building2, User, Mail, Lock, Sparkles, ArrowRight, CheckCircle, Eye, EyeOff, Globe, MapPin, Phone } from 'lucide-react';
 import toast from 'react-hot-toast';
-import logoImage from '../assets/logo.jpeg';
+import logoImage from '../assets/bireena_tallyx_premium_logo.png';
 import './TrialModal.css';
 
 const TrialModal = () => {
@@ -44,38 +44,42 @@ const TrialModal = () => {
 
         setError('');
 
-        const data = {
-            companyName: formData.get('companyName'),
-            email: formData.get('email'),
-            mobile: formData.get('countryCode') + ' ' + formData.get('mobile'),
-            password: password,
-            country: formData.get('country'),
-            state: formData.get('state'),
-            sourceForm: 'TrialModal'
-        };
-
         try {
-            const res = await fetch('http://localhost:5001/api/', {
+            const countryCode = formData.get('countryCode');
+            const mobile = formData.get('mobile');
+            const response = await fetch('http://localhost:5001/api/', { // matches router.post('/') in userRoutes.js
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: data.companyName, email: data.email, password: data.password, companyName: data.companyName }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: formData.get('companyName'), // Using company name as user name for simplicity in this demo logic
+                    email: formData.get('email'),
+                    password: password,
+                    companyName: formData.get('companyName'),
+                    phone: countryCode + mobile
+                })
             });
-            const result = await res.json();
 
-            if (result.success) {
-                // Remove automatic login
-                // localStorage.setItem('tallyx_token', result.token);
+            const data = await response.json();
 
+            if (data.success) {
                 setIsSubmitted(true);
                 setIsSubmitting(false);
-                // No more automatic redirect
+                toast.success('Account created successfully!', {
+                    style: {
+                        background: '#1e1b4b',
+                        color: '#fff',
+                        border: '1px solid #10b981',
+                    }
+                });
             } else {
-                setError(result.message || 'Registration failed. User may already exist.');
+                setError(data.message || 'Registration failed');
                 setIsSubmitting(false);
             }
         } catch (err) {
-            console.error(err);
-            setError('Unable to connect to server.');
+            console.error('Registration Error:', err);
+            setError('Server connection failed. Is the backend running?');
             setIsSubmitting(false);
         }
     };

@@ -12,8 +12,13 @@ const protect = async (req, res, next) => {
             // Get token from header
             token = req.headers.authorization.split(' ')[1];
 
+            console.log('Verifying token:', token);
+            console.log('Using JWT_SECRET:', process.env.JWT_SECRET ? 'Defined' : 'UNDEFINED (Using Fallback)');
+
             // Verify token
             const decoded = jwt.verify(token, process.env.JWT_SECRET || 'bireena_tallyx_secret_key');
+
+            console.log('Token decoded successfully:', decoded);
 
             // Get user from the token (exclude password)
             req.user = await User.findById(decoded.id).select('-password');

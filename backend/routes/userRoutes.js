@@ -30,6 +30,7 @@ router.post('/login', async (req, res) => {
                 _id: user._id,
                 name: user.name,
                 email: user.email,
+                role: user.role,
                 companyName: user.companyName,
                 token: generateToken(user._id),
             });
@@ -59,9 +60,9 @@ router.get('/me', protect, async (req, res) => {
 
 // @route   POST /api/users
 // @desc    Register a new user
-// @access  Public
+// @access  Public (For now, can be restricted later)
 router.post('/', async (req, res) => {
-    const { name, email, password, companyName } = req.body;
+    const { name, email, password, companyName, role } = req.body;
 
     try {
         const userExists = await User.findOne({ email });
@@ -75,6 +76,7 @@ router.post('/', async (req, res) => {
             email,
             password,
             companyName: companyName || name || 'My Company',
+            role: role || 'staff'
         });
 
         if (user) {

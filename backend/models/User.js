@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     name: { type: String, default: 'Admin User' },
     companyName: { type: String, default: 'My Company' },
+    role: { 
+        type: String, 
+        enum: ['superadmin', 'admin', 'ca', 'staff'], 
+        default: 'admin' 
+    },
     resetPasswordToken: String,
     resetPasswordExpire: Date,
 }, { timestamps: true });

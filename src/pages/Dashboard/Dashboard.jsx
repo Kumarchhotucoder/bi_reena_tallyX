@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import toast from 'react-hot-toast';
 import './Dashboard.css';
 import logoImage from '../../assets/bireena_tallyx_premium_logo.png';
 
@@ -19,7 +20,13 @@ const Dashboard = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const profileRef = useRef(null);
-  const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: 'My Company' });
+  const [user, setUser] = useState({ 
+    name: localStorage.getItem('tallyx_user_name') || 'Admin User', 
+    email: localStorage.getItem('tallyx_user_email') || 'admin@bireena.com', 
+    role: localStorage.getItem('tallyx_user_role') || 'admin',
+    initials: (localStorage.getItem('tallyx_user_name') || 'AD').substring(0, 2).toUpperCase(),
+    companyName: localStorage.getItem('tallyx_company_name') || 'My Company' 
+  });
 
   // Company Form State
   const [companyForm, setCompanyForm] = useState({
@@ -136,7 +143,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [user.role]); // Refetch if role changes (unlikely)
 
   const reportData = useMemo(() => {
     const vouchers = dashboardData.vouchers || [];
@@ -433,7 +440,12 @@ const Dashboard = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...salesForm, type: 'SALES', companyName: user.companyName })
+        body: JSON.stringify({ 
+          ...salesForm, 
+          type: 'SALES', 
+          companyName: user.companyName,
+          status: user.role === 'staff' ? 'pending' : 'approved' 
+        })
       });
       const data = await response.json();
       if (response.ok) {
@@ -471,7 +483,12 @@ const Dashboard = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...purchaseForm, type: 'PURCHASE', companyName: user.companyName })
+        body: JSON.stringify({ 
+          ...purchaseForm, 
+          type: 'PURCHASE', 
+          companyName: user.companyName,
+          status: user.role === 'staff' ? 'pending' : 'approved'
+        })
       });
       if (response.ok) {
         setSuccessMessage(`Purchase Voucher ${purchaseForm.invNo} saved successfully!`);
@@ -505,7 +522,12 @@ const Dashboard = () => {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ ...voucherForm, type: activeTab, companyName: user.companyName })
+        body: JSON.stringify({ 
+          ...voucherForm, 
+          type: activeTab, 
+          companyName: user.companyName,
+          status: user.role === 'staff' ? 'pending' : 'approved'
+        })
       });
       if (response.ok) {
         setSuccessMessage(`${activeTab} Voucher saved successfully!`);
@@ -1707,33 +1729,82 @@ const Dashboard = () => {
           </div>
         );
 
-      case 'IMPORT':
+      case 'VERIFICATION':
+        const pendingVouchers = (dashboardData.vouchers || []).filter(v => v.status === 'pending');
         return (
           <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
             <div className="report-header">
               <div>
-                <h3><i className="fas fa-file-import" style={{color: '#e83e8c'}}></i> Import & Export Data</h3>
-                <p className="report-subtitle">Masters & Vouchers Sync</p>
+                <h3><i className="fas fa-shield-alt" style={{color: '#ec4899'}}></i> Verification Center</h3>
+                <p className="report-subtitle">Approve or Reject Staff Entries ({pendingVouchers.length} Pending)</p>
               </div>
               <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
             </div>
-            <div className="ledger-split" style={{marginTop: '20px'}}>
-              <div className="ledger-side border-right">
-                <div className="ledger-head">Import Data</div>
-                <div className="ledger-body" style={{padding: '15px'}}>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)'}}><span>Masters (XML)</span></div>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)'}}><span>Vouchers (XML)</span></div>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px'}}><span>Bank Statement (Excel/CSV)</span></div>
+            
+            <div className="verification-grid" style={{ padding: '20px', display: 'grid', gap: '15px' }}>
+              {pendingVouchers.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-dim)' }}>
+                  <i className="fas fa-check-circle" style={{ fontSize: '40px', marginBottom: '10px', color: 'var(--accent-green)' }}></i>
+                  <p>All entries are verified! No pending items.</p>
                 </div>
-              </div>
-              <div className="ledger-side">
-                <div className="ledger-head">Export Data</div>
-                <div className="ledger-body" style={{padding: '15px'}}>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)'}}><span>All Masters</span></div>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)'}}><span>Day Book Vouchers</span></div>
-                   <div className="ledger-row fw-bold" style={{cursor: 'pointer', padding: '10px'}}><span>Tally e-Way Bill Data</span></div>
-                </div>
-              </div>
+              ) : (
+                pendingVouchers.map(v => (
+                  <div key={v._id} className="pending-item-card" style={{ 
+                    background: 'var(--card-bg)', 
+                    border: '1px solid var(--border)', 
+                    borderRadius: '12px', 
+                    padding: '15px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div>
+                      <div style={{ fontWeight: 'bold', fontSize: '16px' }}>{v.partyName || v.ledgerName || 'General Voucher'}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-dim)' }}>
+                        {v.type} | {v.date} | ₹ {v.totalAmount || 0}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <button 
+                        onClick={async () => {
+                          const token = localStorage.getItem('tallyx_token');
+                          const res = await fetch(`http://localhost:5001/api/vouchers/${v._id}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ status: 'approved' })
+                          });
+                          if(res.ok) {
+                            setDashboardData(prev => ({
+                              ...prev,
+                              vouchers: prev.vouchers.map(item => item._id === v._id ? { ...item, status: 'approved' } : item)
+                            }));
+                            toast.success('Approved successfully!');
+                          }
+                        }}
+                        style={{ background: 'var(--accent-green)', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', fontWeight: 'bold' }}
+                      >Approve</button>
+                      <button 
+                         onClick={async () => {
+                          const token = localStorage.getItem('tallyx_token');
+                          const res = await fetch(`http://localhost:5001/api/vouchers/${v._id}/status`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ status: 'rejected' })
+                          });
+                          if(res.ok) {
+                            setDashboardData(prev => ({
+                              ...prev,
+                              vouchers: prev.vouchers.map(item => item._id === v._id ? { ...item, status: 'rejected' } : item)
+                            }));
+                            toast.error('Entry Rejected');
+                          }
+                        }}
+                        style={{ background: 'var(--accent-red)', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '6px', fontWeight: 'bold' }}
+                      >Reject</button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         );
@@ -1779,11 +1850,25 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-university" label="Banking" shortcut="F10" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
 
           <MenuItem icon="fas fa-book" label="Day Book" shortcut="Alt+D" active={activeTab === 'DAYBOOK'} onClick={() => setActiveTab('DAYBOOK')} />
-          <div className="nav-label">Compliance & Reports</div>
-          <MenuItem icon="fas fa-percentage" label="GST / Taxation" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
-          <MenuItem icon="fas fa-chart-line" label="Profit & Loss" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
-          <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+          {user.role !== 'staff' && (
+            <MenuItem 
+              icon="fas fa-check-double" 
+              label="Verification Center" 
+              shortcut="Alt+V" 
+              active={activeTab === 'VERIFICATION'} 
+              onClick={() => setActiveTab('VERIFICATION')} 
+              className="verification-nav-item"
+            />
+          )}
           
+          <div className="nav-label">Compliance & Reports</div>
+          {user.role !== 'staff' && (
+            <>
+              <MenuItem icon="fas fa-percentage" label="GST / Taxation" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
+              <MenuItem icon="fas fa-chart-line" label="Profit & Loss" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
+              <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+            </>
+          )}          
           <div className="nav-label">Utilities</div>
           <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
           <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />

@@ -28,7 +28,8 @@ const voucherSchema = new mongoose.Schema({
     entries: [voucherEntrySchema], // For Journal/Payment/Receipt/Contra
     narration: String,
     totalAmount: { type: Number, default: 0 },
-    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' }
+    companyId: { type: mongoose.Schema.Types.ObjectId, ref: 'Company' },
+    status: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'approved' }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Voucher', voucherSchema);

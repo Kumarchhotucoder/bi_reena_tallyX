@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, User, Settings, LogOut, LayoutDashboard } from 'lucide-react';
-import logoImage from '../assets/bireena_tallyx_premium_logo.png';
+import logoImage from '../assets/logo.jpeg';
 import './Navbar.css';
 
 const Navbar = () => {

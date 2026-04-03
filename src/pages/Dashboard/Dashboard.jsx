@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
 import './Dashboard.css';
-import logoImage from '../../assets/bireena_tallyx_premium_logo.png';
+import logoImage from '../../assets/logo.jpeg';
 
 const Dashboard = () => {
   const navigate = useNavigate();

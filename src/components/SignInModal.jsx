@@ -88,7 +88,7 @@ const SignInModal = () => {
 
                 <div className="signin-v2-header">
                     <h1>Welcome Back!</h1>
-                    <p>Login to manage your hotel operations</p>
+                    <p>Login to manage your banking & accounting operations</p>
                 </div>
 
                 <div className="signin-v2-role-selector">

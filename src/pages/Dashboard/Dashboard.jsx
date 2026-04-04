@@ -145,6 +145,23 @@ const Dashboard = () => {
     fetchData();
   }, [user.role]); // Refetch if role changes (unlikely)
 
+  // Smart Narration Logic
+  useEffect(() => {
+    if (activeTab === 'SALES') {
+      setSalesForm(prev => ({ ...prev, narration: prev.narration || `Being goods sold on credit to ${prev.partyName}` }));
+    } else if (activeTab === 'PURCHASE') {
+      setPurchaseForm(prev => ({ ...prev, narration: prev.narration || `Being goods purchased on credit from ${prev.partyName}` }));
+    } else if (activeTab === 'PAYMENT') {
+      setVoucherForm(prev => ({ ...prev, type: 'PAYMENT', narration: prev.narration || `Being payment made via ${prev.account}` }));
+    } else if (activeTab === 'RECEIPT') {
+      setVoucherForm(prev => ({ ...prev, type: 'RECEIPT', narration: prev.narration || `Being payment received via ${prev.account}` }));
+    } else if (activeTab === 'CONTRA') {
+      setVoucherForm(prev => ({ ...prev, type: 'CONTRA', narration: prev.narration || `Being cash/bank transfer via ${prev.account}` }));
+    } else if (activeTab === 'JOURNAL') {
+      setVoucherForm(prev => ({ ...prev, type: 'JOURNAL', narration: prev.narration || `Being adjustment entry` }));
+    }
+  }, [activeTab]);
+
   const reportData = useMemo(() => {
     const vouchers = dashboardData.vouchers || [];
     const ledgers = dashboardData.ledgers || [];
@@ -237,15 +254,21 @@ const Dashboard = () => {
       // Alt Shortcuts
       if (alt) {
         const lowerKey = key.toLowerCase();
-        if (lowerKey === 't') { e.preventDefault(); setActiveTab('GST'); } 
+        if (lowerKey === 't') { e.preventDefault(); if (user.role !== 'staff') setActiveTab('GST'); } 
         else if (lowerKey === 'd') { e.preventDefault(); setActiveTab('DAYBOOK'); }
-        else if (lowerKey === 'p') { e.preventDefault(); setActiveTab('PL'); }
-        else if (lowerKey === 'b') { e.preventDefault(); setActiveTab('BS'); }
-        else if (lowerKey === 'r') { e.preventDefault(); setActiveTab('PRINT'); }
+        else if (lowerKey === 'v') { e.preventDefault(); if (user.role !== 'staff') setActiveTab('VERIFICATION'); }
+        else if (lowerKey === 'p') { e.preventDefault(); if (user.role !== 'staff') setActiveTab('PL'); }
+        else if (lowerKey === 'b') { e.preventDefault(); if (user.role !== 'staff') setActiveTab('BS'); }
+        else if (lowerKey === 'r') { e.preventDefault(); setActiveTab('EXPORT'); }
         else if (lowerKey === 'k') { e.preventDefault(); setActiveTab('BACKUP'); }
         else if (lowerKey === 'i') { e.preventDefault(); setActiveTab('IMPORT'); }
-        else if (lowerKey === 'u') { e.preventDefault(); setActiveTab('PROFILE'); }
+        else if (lowerKey === 'u') { e.preventDefault(); setSettingsModalTitle('My Profile'); setSettingsModalOpen(true); }
         else if (lowerKey === 'l') { e.preventDefault(); handleLogout(); }
+        else if (lowerKey === 'g') {
+          e.preventDefault();
+          const searchInput = document.querySelector('.command-center input');
+          if (searchInput) searchInput.focus();
+        }
       }
 
       // Quick actions for specific tabs
@@ -653,7 +676,7 @@ const Dashboard = () => {
 
       case 'SALES':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+          <div className="report-card animate-fade voucher-sales" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="report-header" style={{ background: 'linear-gradient(90deg, rgba(47,129,247,0.1) 0%, transparent 100%)', borderLeft: '4px solid var(--accent-blue)', padding: '15px 20px' }}>
               <div>
                 <h3 style={{color: 'var(--accent-blue)', fontSize: '20px', margin: '0 0 5px 0'}}><i className="fas fa-file-invoice-dollar"></i> Sales Tax Invoice</h3>
@@ -767,7 +790,7 @@ const Dashboard = () => {
 
       case 'PURCHASE':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+          <div className="report-card animate-fade voucher-purchase" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="report-header" style={{ background: 'linear-gradient(90deg, rgba(40,167,69,0.1) 0%, transparent 100%)', borderLeft: '4px solid var(--accent-green)', padding: '15px 20px' }}>
               <div>
                 <h3 style={{color: 'var(--accent-green)', fontSize: '20px', margin: '0 0 5px 0'}}><i className="fas fa-shopping-basket"></i> Purchase Voucher</h3>
@@ -1281,7 +1304,7 @@ const Dashboard = () => {
         if(activeTab === 'JOURNAL') { vColor2 = '#6f42c1'; vIcon2 = 'fa-book-open'; }
 
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
+          <div className={`report-card animate-fade voucher-${activeTab.toLowerCase()}`} style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
             <div className="report-header" style={{ borderBottom: `2px solid ${vColor2}`, paddingBottom: '10px' }}>
               <div>
                 <h3 style={{color: vColor2}}><i className={`fas ${vIcon2}`}></i> {activeTab} Voucher</h3>
@@ -1825,58 +1848,51 @@ const Dashboard = () => {
           </button>
         </div>
         
-        <nav className="nav-group">
-          <div className="nav-label">Setup & Creation</div>
-          <MenuItem icon="fas fa-plus-circle" label="Company Creation" shortcut="F1" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
-          <MenuItem icon="fas fa-book" label="Ledger Creation" shortcut="F2" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
+        <div className="nav-group">
+          {/* Phase 1: Setup */}
+          <div className="phase-label phase-1">Phase 1 — Setup</div>
+          <MenuItem icon="fas fa-plus-circle" label="Company" shortcut="F1" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
+          <MenuItem icon="fas fa-book" label="Ledger" shortcut="F2" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
           <MenuItem icon="fas fa-boxes" label="Stock Entry" shortcut="F3" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
 
-          <div className="nav-label">Core Transactions</div>
+          {/* Phase 2: Transactions */}
+          <div className="phase-label phase-2">Phase 2 — Transactions</div>
+          <MenuItem icon="fas fa-shopping-cart" label="Sales" shortcut="F8" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
+          <MenuItem icon="fas fa-shopping-basket" label="Purchase" shortcut="F9" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
+          
           <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
-            <button className={`nav-btn ${activeTab === 'JOURNAL' || activeTab === 'CONTRA' || activeTab === 'PAYMENT' || activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => { toggleMenu('coreTransactions'); setActiveTab('JOURNAL'); }}>
-              <i className="fas fa-receipt"></i> Voucher Entry <span className="shortcut-badge">F7</span>
+            <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
+              <i className="fas fa-receipt"></i> Vouchers
               <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
             </button>
             <div className="sub-menu">
-              <button className={`sub-btn ${activeTab === 'JOURNAL' ? 'active' : ''}`} onClick={() => setActiveTab('JOURNAL')}>Journal Entry <span className="shortcut-badge sm">F7</span></button>
-              <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra Entry <span className="shortcut-badge sm">F4</span></button>
               <button className={`sub-btn ${activeTab === 'PAYMENT' ? 'active' : ''}`} onClick={() => setActiveTab('PAYMENT')}>Payment <span className="shortcut-badge sm">F5</span></button>
               <button className={`sub-btn ${activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => setActiveTab('RECEIPT')}>Receipt <span className="shortcut-badge sm">F6</span></button>
+              <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra <span className="shortcut-badge sm">F4</span></button>
+              <button className={`sub-btn ${activeTab === 'JOURNAL' ? 'active' : ''}`} onClick={() => setActiveTab('JOURNAL')}>Journal <span className="shortcut-badge sm">F7</span></button>
             </div>
           </div>
-
-          <MenuItem icon="fas fa-shopping-cart" label="Sales" shortcut="F8" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
-          <MenuItem icon="fas fa-shopping-basket" label="Purchase" shortcut="F9" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
           <MenuItem icon="fas fa-university" label="Banking" shortcut="F10" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
 
-          <MenuItem icon="fas fa-book" label="Day Book" shortcut="Alt+D" active={activeTab === 'DAYBOOK'} onClick={() => setActiveTab('DAYBOOK')} />
+          {/* Phase 3: Review */}
+          <div className="phase-label phase-3">Phase 3 — Review</div>
+          <MenuItem icon="fas fa-history" label="Day Book" shortcut="Alt+D" active={activeTab === 'DAYBOOK'} onClick={() => setActiveTab('DAYBOOK')} />
           {user.role !== 'staff' && (
-            <MenuItem 
-              icon="fas fa-check-double" 
-              label="Verification Center" 
-              shortcut="Alt+V" 
-              active={activeTab === 'VERIFICATION'} 
-              onClick={() => setActiveTab('VERIFICATION')} 
-              className="verification-nav-item"
-            />
+            <MenuItem icon="fas fa-check-double" label="Verification" shortcut="Alt+V" active={activeTab === 'VERIFICATION'} onClick={() => setActiveTab('VERIFICATION')} />
           )}
-          
-          <div className="nav-label">Compliance & Reports</div>
-          {user.role !== 'staff' && (
-            <>
-              <MenuItem icon="fas fa-percentage" label="GST / Taxation" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
-              <MenuItem icon="fas fa-chart-line" label="Profit & Loss" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
-              <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
-            </>
-          )}          
-          <div className="nav-label">Utilities</div>
-          <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
-          <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
-          <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
-          <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
 
-          <MenuItem icon="fas fa-sign-out-alt" label="Logout" shortcut="Alt+L" className="dash-logout-btn" onClick={handleLogout} />
-        </nav>
+          {/* Phase 4: Reports */}
+          <div className="phase-label phase-4">Phase 4 — Reports</div>
+          <MenuItem icon="fas fa-percentage" label="GST / Taxation" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
+          <MenuItem icon="fas fa-chart-line" label="Profit & Loss" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
+          <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+          <MenuItem icon="fas fa-file-export" label="Print & Export" shortcut="Alt+R" active={activeTab === 'EXPORT'} onClick={() => setActiveTab('EXPORT')} />
+
+          {/* Phase 5: Maintenance */}
+          <div className="phase-label phase-5">Phase 5 — Utils</div>
+          <MenuItem icon="fas fa-save" label="Backup" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
+          <MenuItem icon="fas fa-file-import" label="Import/Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+        </div>
       </aside>
 
       <main className="main-content">
@@ -1891,22 +1907,100 @@ const Dashboard = () => {
           </div>
           
           <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-            <button className="theme-toggle" onClick={toggleTheme}>
-              <i className={isDarkMode ? "fas fa-moon" : "fas fa-sun"}></i> 
-              <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
+            <button className="theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
+              <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"}></i> 
+              <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
             </button>
             <div style={{textAlign: 'right'}}>
-              <p style={{fontSize: '14px', fontWeight: '800'}}>Manish Pvt Ltd</p>
+              <p style={{fontSize: '14px', fontWeight: '800'}}>{user.companyName}</p>
               <p style={{fontSize: '11px', color: 'var(--accent-green)', fontWeight: '700'}}>FY 2025-26 | Patna</p>
             </div>
-            <img src={`https://ui-avatars.com/api/?name=Admin&background=2f81f7&color=fff&bold=true`} 
-                 style={{width: '42px', borderRadius: '50%', border: '2px solid var(--border)'}} alt="User" />
+            <div style={{ position: 'relative' }} ref={profileRef}>
+              <div className="dash-profile-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>
+                {user.initials}
+              </div>
+              
+              <div className={`dash-profile-popup ${isProfileOpen ? 'active' : ''}`}>
+                <div className="dash-profile-header">
+                  <div className="dash-profile-avatar large">
+                    {user.initials}
+                  </div>
+                  <div className="dash-profile-info">
+                    <h4>{user.name}</h4>
+                    <p>{user.email}</p>
+                  </div>
+                </div>
+                
+                <div className="dash-profile-menu">
+                  <button className="dash-menu-item" onClick={() => { setSettingsModalTitle('My Profile'); setSettingsModalOpen(true); setIsProfileOpen(false); }}>
+                    <i className="fas fa-user-circle" style={{ marginRight: '12px' }}></i> My Profile
+                  </button>
+                  <button className="dash-menu-item" onClick={() => { setSettingsModalTitle('Company Settings'); setSettingsModalOpen(true); setIsProfileOpen(false); }}>
+                    <i className="fas fa-building" style={{ marginRight: '12px' }}></i> {user.companyName}
+                  </button>
+                  <div className="dash-divider"></div>
+                  <button className="dash-menu-item dash-logout" onClick={handleLogout}>
+                    <i className="fas fa-sign-out-alt" style={{ marginRight: '12px' }}></i> Logout
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </header>
+
+        <div className="shortcut-bar">
+          <div className="shortcut-item" onClick={() => setActiveTab('COMPANY')}><span className="shortcut-key">F1</span> Setup</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('LEDGER')}><span className="shortcut-key">F2</span> Ledger</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('STOCK')}><span className="shortcut-key">F3</span> Stock</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('CONTRA')}><span className="shortcut-key">F4</span> Contra</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('PAYMENT')}><span className="shortcut-key">F5</span> Payment</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('RECEIPT')}><span className="shortcut-key">F6</span> Receipt</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('JOURNAL')}><span className="shortcut-key">F7</span> Journal</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('SALES')}><span className="shortcut-key">F8</span> Sales</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('PURCHASE')}><span className="shortcut-key">F9</span> Purchase</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('BANKING')}><span className="shortcut-key">F10</span> Banking</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('DAYBOOK')}><span className="shortcut-key">Alt+D</span> Day Book</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('GST')}><span className="shortcut-key">Alt+T</span> GST</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('PL')}><span className="shortcut-key">Alt+P</span> P&L</div>
+          <div className="shortcut-item" onClick={() => setActiveTab('BS')}><span className="shortcut-key">Alt+B</span> BS</div>
+        </div>
 
         <div className="dashboard-container">
           {activeTab === 'DASHBOARD' ? (
             <>
+              <div className="quick-actions-grid animate-fade" style={{ gridColumn: 'span 2' }}>
+                <div className="action-card" onClick={() => setActiveTab('SALES')}>
+                  <i className="fas fa-shopping-cart" style={{ color: 'var(--sales-blue)' }}></i>
+                  <span>New Sale</span>
+                  <div className="shortcut">F8</div>
+                </div>
+                <div className="action-card" onClick={() => setActiveTab('PURCHASE')}>
+                  <i className="fas fa-shopping-basket" style={{ color: 'var(--purchase-green)' }}></i>
+                  <span>New Purchase</span>
+                  <div className="shortcut">F9</div>
+                </div>
+                <div className="action-card" onClick={() => setActiveTab('PAYMENT')}>
+                  <i className="fas fa-money-bill-wave" style={{ color: 'var(--payment-amber)' }}></i>
+                  <span>Record Payment</span>
+                  <div className="shortcut">F5</div>
+                </div>
+                <div className="action-card" onClick={() => setActiveTab('RECEIPT')}>
+                  <i className="fas fa-hand-holding-usd" style={{ color: 'var(--receipt-cyan)' }}></i>
+                  <span>Record Receipt</span>
+                  <div className="shortcut">F6</div>
+                </div>
+                <div className="action-card" onClick={() => setActiveTab('LEDGER')}>
+                  <i className="fas fa-user-plus" style={{ color: 'var(--accent-blue)' }}></i>
+                  <span>Create Ledger</span>
+                  <div className="shortcut">F2</div>
+                </div>
+                <div className="action-card" onClick={() => setActiveTab('STOCK')}>
+                  <i className="fas fa-box-open" style={{ color: 'var(--accent-green)' }}></i>
+                  <span>Add Stock</span>
+                  <div className="shortcut">F3</div>
+                </div>
+              </div>
+
               <div className="card">
                 <div className="card-title">Total Receivables <i className="fas fa-arrow-trend-up" style={{color:'var(--accent-green)'}}></i></div>
                 <div className="insights-grid">

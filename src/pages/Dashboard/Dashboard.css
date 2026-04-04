@@ -11,6 +11,14 @@
     --accent-red: #da3633;
     --border: #30363d;
     --glass: rgba(255, 255, 255, 0.05);
+
+    /* Phase & Voucher Colors */
+    --sales-blue: #3b82f6;
+    --purchase-green: #10b981;
+    --payment-amber: #f59e0b;
+    --receipt-cyan: #06b6d4;
+    --journal-purple: #8b5cf6;
+    --contra-pink: #ec4899;
 }
 
 .light-mode {
@@ -93,6 +101,32 @@
 .nav-group { padding: 10px; }
 .nav-label { font-size: 10px; font-weight: 800; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; padding: 15px 15px 5px; opacity: 0.6; }
 
+.phase-label {
+    font-size: 11px;
+    font-weight: 900;
+    padding: 18px 15px 8px;
+    color: var(--accent-blue);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.phase-label::before {
+    content: '';
+    width: 4px;
+    height: 12px;
+    background: currentColor;
+    border-radius: 2px;
+}
+
+.phase-1 { color: #8b5cf6; } /* Setup */
+.phase-2 { color: #10b981; } /* Transactions */
+.phase-3 { color: #f59e0b; } /* Review */
+.phase-4 { color: #3b82f6; } /* Reports */
+.phase-5 { color: #6b7280; } /* Maintenance */
+
 .nav-btn {
     width: 100%;
     padding: 11px 15px;
@@ -139,6 +173,89 @@
 .command-center input { border: none; background: transparent; outline: none; color: var(--text-main); width: 100%; font-size: 14px; }
 
 .theme-toggle { background: var(--accent-blue); color: white; border: none; padding: 9px 18px; border-radius: 25px; cursor: pointer; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; transition: 0.3s; box-shadow: 0 4px 12px rgba(47, 129, 247, 0.3); }
+
+/* FLOATING SHORTCUT BAR */
+.shortcut-bar {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 40px;
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    white-space: nowrap;
+    position: sticky;
+    top: 70px;
+    z-index: 99;
+    scrollbar-width: none;
+}
+
+.shortcut-bar::-webkit-scrollbar { display: none; }
+
+.shortcut-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-dim);
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.shortcut-item:hover {
+    background: var(--hover-bg);
+    color: var(--text-main);
+    border-color: var(--text-dim);
+    transform: translateY(-1px);
+}
+
+.shortcut-key {
+    background: var(--accent-blue);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* QUICK ACTIONS DASHBOARD */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.action-card {
+    padding: 20px;
+    border-radius: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+}
+
+.action-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.action-card i { font-size: 24px; margin-bottom: 12px; display: block; }
+.action-card span { font-size: 12px; font-weight: 700; display: block; }
+.action-card .shortcut { color: var(--text-dim); font-size: 10px; margin-top: 5px; }
+
+/* Voucher Color Themes */
+.voucher-sales { border-top: 4px solid var(--sales-blue); }
+.voucher-purchase { border-top: 4px solid var(--purchase-green); }
+.voucher-payment { border-top: 4px solid var(--payment-amber); }
+.voucher-receipt { border-top: 4px solid var(--receipt-cyan); }
+.voucher-journal { border-top: 4px solid var(--journal-purple); }
+.voucher-contra { border-top: 4px solid var(--contra-pink); }
+
 
 .dashboard-container { padding: 40px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; }
 .card { background: var(--card-bg); border-radius: 24px; padding: 30px; border: 1px solid var(--border); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }

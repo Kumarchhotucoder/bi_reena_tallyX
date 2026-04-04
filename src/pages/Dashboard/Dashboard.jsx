@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import toast from 'react-hot-toast';
+import useGlobalShortcuts from '../../hooks/useGlobalShortcuts';
 import './Dashboard.css';
 import logoImage from '../../assets/logo.jpeg';
 
@@ -161,6 +162,8 @@ const Dashboard = () => {
       setVoucherForm(prev => ({ ...prev, type: 'JOURNAL', narration: prev.narration || `Being adjustment entry` }));
     }
   }, [activeTab]);
+
+  useGlobalShortcuts(setActiveTab);
 
   const reportData = useMemo(() => {
     const vouchers = dashboardData.vouchers || [];
@@ -1838,234 +1841,131 @@ const Dashboard = () => {
   return (
     <div className={`app-wrapper ${isDarkMode ? '' : 'light-mode'}`}>
       
-      {isSidebarOpen && <div className="mobile-overlay" onClick={() => setIsSidebarOpen(false)}></div>}
-
-      <aside className={`sidebar ${isSidebarOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-header">
-          <img src={logoImage} alt="BIREENA Tally X" className="app-logo" />
-          <button className="mobile-close-btn" onClick={() => setIsSidebarOpen(false)}>
-            <i className="fas fa-times"></i>
-          </button>
-        </div>
-        
-        <div className="nav-group">
-          {/* Phase 1: Setup */}
-          <div className="phase-label phase-1">Phase 1 — Setup</div>
-          <MenuItem icon="fas fa-plus-circle" label="Company" shortcut="F1" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
-          <MenuItem icon="fas fa-book" label="Ledger" shortcut="F2" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
-          <MenuItem icon="fas fa-boxes" label="Stock Entry" shortcut="F3" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
-
-          {/* Phase 2: Transactions */}
-          <div className="phase-label phase-2">Phase 2 — Transactions</div>
-          <MenuItem icon="fas fa-shopping-cart" label="Sales" shortcut="F8" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
-          <MenuItem icon="fas fa-shopping-basket" label="Purchase" shortcut="F9" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
-          
-          <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
-            <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
-              <i className="fas fa-receipt"></i> Vouchers
-              <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
-            </button>
-            <div className="sub-menu">
-              <button className={`sub-btn ${activeTab === 'PAYMENT' ? 'active' : ''}`} onClick={() => setActiveTab('PAYMENT')}>Payment <span className="shortcut-badge sm">F5</span></button>
-              <button className={`sub-btn ${activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => setActiveTab('RECEIPT')}>Receipt <span className="shortcut-badge sm">F6</span></button>
-              <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra <span className="shortcut-badge sm">F4</span></button>
-              <button className={`sub-btn ${activeTab === 'JOURNAL' ? 'active' : ''}`} onClick={() => setActiveTab('JOURNAL')}>Journal <span className="shortcut-badge sm">F7</span></button>
-            </div>
+      <aside className="sidebar">
+        <div className="sidebar-header" onClick={() => setActiveTab('DASHBOARD')} style={{cursor: 'pointer'}}>
+          <img src={logoImage} alt="Logo" className="sidebar-logo" />
+          <div className="sidebar-brand">
+            <h2>BiReena</h2>
+            <p>TallyX</p>
           </div>
-          <MenuItem icon="fas fa-university" label="Banking" shortcut="F10" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
-
-          {/* Phase 3: Review */}
-          <div className="phase-label phase-3">Phase 3 — Review</div>
-          <MenuItem icon="fas fa-history" label="Day Book" shortcut="Alt+D" active={activeTab === 'DAYBOOK'} onClick={() => setActiveTab('DAYBOOK')} />
-          {user.role !== 'staff' && (
-            <MenuItem icon="fas fa-check-double" label="Verification" shortcut="Alt+V" active={activeTab === 'VERIFICATION'} onClick={() => setActiveTab('VERIFICATION')} />
-          )}
-
-          {/* Phase 4: Reports */}
-          <div className="phase-label phase-4">Phase 4 — Reports</div>
-          <MenuItem icon="fas fa-percentage" label="GST / Taxation" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
-          <MenuItem icon="fas fa-chart-line" label="Profit & Loss" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
-          <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
-          <MenuItem icon="fas fa-file-export" label="Print & Export" shortcut="Alt+R" active={activeTab === 'EXPORT'} onClick={() => setActiveTab('EXPORT')} />
-
-          {/* Phase 5: Maintenance */}
-          <div className="phase-label phase-5">Phase 5 — Utils</div>
-          <MenuItem icon="fas fa-save" label="Backup" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
-          <MenuItem icon="fas fa-file-import" label="Import/Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
         </div>
+
+        <nav className="sidebar-nav">
+          <PhaseLabel phase="1" label="Phase 1 — Setup" />
+          <SidebarItem icon="fas fa-building" label="Company" shortcut="F1" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
+          <SidebarItem icon="fas fa-book" label="Ledger" shortcut="F2" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
+          <SidebarItem icon="fas fa-boxes" label="Stock Entry" shortcut="F3" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
+
+          <PhaseLabel phase="2" label="Phase 2 — Transactions" />
+          <SidebarItem icon="fas fa-shopping-cart" label="Sales" shortcut="F8" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
+          <SidebarItem icon="fas fa-shopping-basket" label="Purchase" shortcut="F9" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
+          
+          <div style={{ padding: '20px 20px 8px', fontSize: '10px', color: 'var(--text-dim)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '1.5px' }}>Vouchers</div>
+          <SidebarItem icon="fas fa-money-bill-wave" label="Payment" shortcut="F5" active={activeTab === 'PAYMENT'} onClick={() => setActiveTab('PAYMENT')} />
+          <SidebarItem icon="fas fa-hand-holding-usd" label="Receipt" shortcut="F6" active={activeTab === 'RECEIPT'} onClick={() => setActiveTab('RECEIPT')} />
+          <SidebarItem icon="fas fa-exchange-alt" label="Contra" shortcut="F4" active={activeTab === 'CONTRA'} onClick={() => setActiveTab('CONTRA')} />
+          <SidebarItem icon="fas fa-book-open" label="Journal" shortcut="F7" active={activeTab === 'JOURNAL'} onClick={() => setActiveTab('JOURNAL')} />
+          <SidebarItem icon="fas fa-university" label="Banking" shortcut="F10" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
+
+          <PhaseLabel phase="3" label="Phase 3 — Review" />
+          <SidebarItem icon="fas fa-history" label="Day Book" shortcut="Alt+D" active={activeTab === 'DAYBOOK'} onClick={() => setActiveTab('DAYBOOK')} />
+          <SidebarItem icon="fas fa-check-double" label="Verification" shortcut="Alt+V" active={activeTab === 'VERIFICATION'} onClick={() => setActiveTab('VERIFICATION')} />
+
+          <PhaseLabel phase="4" label="Phase 4 — Reports" />
+          <SidebarItem icon="fas fa-percentage" label="GST/Tax" shortcut="Alt+T" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
+          <SidebarItem icon="fas fa-chart-line" label="P&L" shortcut="Alt+P" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
+          <SidebarItem icon="fas fa-balance-scale" label="Balance Sheet" shortcut="Alt+B" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+          <SidebarItem icon="fas fa-file-export" label="Print & Export" shortcut="Alt+R" active={activeTab === 'EXPORT'} onClick={() => setActiveTab('EXPORT')} />
+
+          <PhaseLabel phase="5" label="Phase 5 — Utils" />
+          <SidebarItem icon="fas fa-save" label="Backup" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
+          <SidebarItem icon="fas fa-file-import" label="Import" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+        </nav>
       </aside>
 
       <main className="main-content">
         <header className="top-nav">
-          <button className="mobile-menu-toggle" onClick={() => setIsSidebarOpen(true)}>
-            <i className="fas fa-bars"></i>
-          </button>
-          
-          <div className="command-center">
-            <i className="fas fa-bolt" style={{color: 'var(--tally-yellow)'}}></i>
-            <input type="text" placeholder="Go To... (Alt+G)" />
+          <div className="global-search-container">
+            <i className="fas fa-search" style={{ color: 'var(--text-dim)', fontSize: '12px' }}></i>
+            <input type="text" id="global-search" placeholder="Go to any screen..." />
+            <span className="global-search-hint">Alt+G</span>
           </div>
           
-          <div style={{display: 'flex', alignItems: 'center', gap: '20px'}}>
-            <button className="theme-toggle" onClick={() => setIsDarkMode(!isDarkMode)}>
-              <i className={isDarkMode ? "fas fa-sun" : "fas fa-moon"}></i> 
-              <span>{isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-            </button>
-            <div style={{textAlign: 'right'}}>
-              <p style={{fontSize: '14px', fontWeight: '800'}}>{user.companyName}</p>
-              <p style={{fontSize: '11px', color: 'var(--accent-green)', fontWeight: '700'}}>FY 2025-26 | Patna</p>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="company-info" style={{ textAlign: 'right', marginRight: '15px' }}>
+              <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '700' }}>{user.companyName}</h4>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--accent-green)', fontWeight: '600' }}>FY 2025-26 | Patna</p>
             </div>
-            <div style={{ position: 'relative' }} ref={profileRef}>
-              <div className="dash-profile-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>
-                {user.initials}
-              </div>
-              
-              <div className={`dash-profile-popup ${isProfileOpen ? 'active' : ''}`}>
-                <div className="dash-profile-header">
-                  <div className="dash-profile-avatar large">
-                    {user.initials}
-                  </div>
-                  <div className="dash-profile-info">
-                    <h4>{user.name}</h4>
-                    <p>{user.email}</p>
-                  </div>
-                </div>
-                
-                <div className="dash-profile-menu">
-                  <button className="dash-menu-item" onClick={() => { setSettingsModalTitle('My Profile'); setSettingsModalOpen(true); setIsProfileOpen(false); }}>
-                    <i className="fas fa-user-circle" style={{ marginRight: '12px' }}></i> My Profile
-                  </button>
-                  <button className="dash-menu-item" onClick={() => { setSettingsModalTitle('Company Settings'); setSettingsModalOpen(true); setIsProfileOpen(false); }}>
-                    <i className="fas fa-building" style={{ marginRight: '12px' }}></i> {user.companyName}
-                  </button>
-                  <div className="dash-divider"></div>
-                  <button className="dash-menu-item dash-logout" onClick={handleLogout}>
-                    <i className="fas fa-sign-out-alt" style={{ marginRight: '12px' }}></i> Logout
-                  </button>
-                </div>
-              </div>
+            <div className="dash-profile-avatar" onClick={() => setIsProfileOpen(!isProfileOpen)}>
+              {user.initials}
             </div>
           </div>
         </header>
 
         <div className="shortcut-bar">
-          <div className="shortcut-item" onClick={() => setActiveTab('COMPANY')}><span className="shortcut-key">F1</span> Setup</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('LEDGER')}><span className="shortcut-key">F2</span> Ledger</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('STOCK')}><span className="shortcut-key">F3</span> Stock</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('CONTRA')}><span className="shortcut-key">F4</span> Contra</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('PAYMENT')}><span className="shortcut-key">F5</span> Payment</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('RECEIPT')}><span className="shortcut-key">F6</span> Receipt</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('JOURNAL')}><span className="shortcut-key">F7</span> Journal</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('SALES')}><span className="shortcut-key">F8</span> Sales</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('PURCHASE')}><span className="shortcut-key">F9</span> Purchase</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('BANKING')}><span className="shortcut-key">F10</span> Banking</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('DAYBOOK')}><span className="shortcut-key">Alt+D</span> Day Book</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('GST')}><span className="shortcut-key">Alt+T</span> GST</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('PL')}><span className="shortcut-key">Alt+P</span> P&L</div>
-          <div className="shortcut-item" onClick={() => setActiveTab('BS')}><span className="shortcut-key">Alt+B</span> BS</div>
+          <ShortcutPill badge="F1" label="Setup" color="var(--accent-purple)" onClick={() => setActiveTab('COMPANY')} />
+          <ShortcutPill badge="F2" label="Ledger" color="var(--accent-blue)" onClick={() => setActiveTab('LEDGER')} />
+          <ShortcutPill badge="F3" label="Stock" color="var(--accent-green)" onClick={() => setActiveTab('STOCK')} />
+          <ShortcutPill badge="F4" label="Contra" color="var(--accent-pink)" onClick={() => setActiveTab('CONTRA')} />
+          <ShortcutPill badge="F5" label="Payment" color="var(--accent-amber)" onClick={() => setActiveTab('PAYMENT')} />
+          <ShortcutPill badge="F6" label="Receipt" color="var(--accent-teal)" onClick={() => setActiveTab('RECEIPT')} />
+          <ShortcutPill badge="F7" label="Journal" color="var(--accent-purple)" onClick={() => setActiveTab('JOURNAL')} />
+          <ShortcutPill badge="F8" label="Sales" color="var(--accent-blue)" onClick={() => setActiveTab('SALES')} />
+          <ShortcutPill badge="F9" label="Purchase" color="var(--accent-green)" onClick={() => setActiveTab('PURCHASE')} />
+          <ShortcutPill badge="F10" label="Banking" color="var(--text-dim)" onClick={() => setActiveTab('BANKING')} />
         </div>
 
-        <div className="dashboard-container">
+        <div className="dashboard-scroll-area" style={{ flex: 1, overflowY: 'auto' }}>
           {activeTab === 'DASHBOARD' ? (
             <>
-              <div className="quick-actions-grid animate-fade" style={{ gridColumn: 'span 2' }}>
-                <div className="action-card" onClick={() => setActiveTab('SALES')}>
-                  <i className="fas fa-shopping-cart" style={{ color: 'var(--sales-blue)' }}></i>
-                  <span>New Sale</span>
-                  <div className="shortcut">F8</div>
-                </div>
-                <div className="action-card" onClick={() => setActiveTab('PURCHASE')}>
-                  <i className="fas fa-shopping-basket" style={{ color: 'var(--purchase-green)' }}></i>
-                  <span>New Purchase</span>
-                  <div className="shortcut">F9</div>
-                </div>
-                <div className="action-card" onClick={() => setActiveTab('PAYMENT')}>
-                  <i className="fas fa-money-bill-wave" style={{ color: 'var(--payment-amber)' }}></i>
-                  <span>Record Payment</span>
-                  <div className="shortcut">F5</div>
-                </div>
-                <div className="action-card" onClick={() => setActiveTab('RECEIPT')}>
-                  <i className="fas fa-hand-holding-usd" style={{ color: 'var(--receipt-cyan)' }}></i>
-                  <span>Record Receipt</span>
-                  <div className="shortcut">F6</div>
-                </div>
-                <div className="action-card" onClick={() => setActiveTab('LEDGER')}>
-                  <i className="fas fa-user-plus" style={{ color: 'var(--accent-blue)' }}></i>
-                  <span>Create Ledger</span>
-                  <div className="shortcut">F2</div>
-                </div>
-                <div className="action-card" onClick={() => setActiveTab('STOCK')}>
-                  <i className="fas fa-box-open" style={{ color: 'var(--accent-green)' }}></i>
-                  <span>Add Stock</span>
-                  <div className="shortcut">F3</div>
-                </div>
+              <div className="quick-actions-grid animate-fade">
+                <ActionCard icon="fa-shopping-cart" label="New Sale" shortcut="F8" color="var(--accent-blue)" bg="var(--sales-bg)" onClick={() => setActiveTab('SALES')} />
+                <ActionCard icon="fa-shopping-basket" label="New Purchase" shortcut="F9" color="var(--accent-green)" bg="var(--purchase-bg)" onClick={() => setActiveTab('PURCHASE')} />
+                <ActionCard icon="fa-money-bill-wave" label="Record Payment" shortcut="F5" color="var(--accent-amber)" bg="var(--payment-bg)" onClick={() => setActiveTab('PAYMENT')} />
+                <ActionCard icon="fa-hand-holding-usd" label="Record Receipt" shortcut="F6" color="var(--accent-teal)" bg="var(--receipt-bg)" onClick={() => setActiveTab('RECEIPT')} />
+                <ActionCard icon="fa-user-plus" label="Create Ledger" shortcut="F2" color="var(--accent-blue)" bg="rgba(55,138,221,0.05)" onClick={() => setActiveTab('LEDGER')} />
+                <ActionCard icon="fa-history" label="Day Book" shortcut="Alt+D" color="var(--accent-pink)" bg="var(--contra-bg)" onClick={() => setActiveTab('DAYBOOK')} />
               </div>
 
-              <div className="card">
-                <div className="card-title">Total Receivables <i className="fas fa-arrow-trend-up" style={{color:'var(--accent-green)'}}></i></div>
-                <div className="insights-grid">
-                  <div className="circle-chart"></div>
-                  <div>
-                    <div className="big-amt">₹ {metrics.receivables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
-                      <span style={{color: 'var(--accent-blue)'}}><i className="fas fa-check-circle"></i> On Time: <b>₹3,42,250</b></span>
-                      <span style={{color: 'var(--tally-yellow)'}}><i className="fas fa-exclamation-circle"></i> Overdue: <b>₹42,250</b></span>
-                    </div>
-                  </div>
-                </div>
+              <div className="stats-row animate-fade">
+                <StatCard label="Total Receivables" value={`₹${metrics.receivables.toLocaleString()}`} sub="On time: ₹3,42,250" color="var(--accent-blue)" />
+                <StatCard label="Total Payables" value={`₹${metrics.payables.toLocaleString()}`} sub="Critical: ₹12,250" color="var(--accent-amber)" />
+                <StatCard label="Cash Balance" value={`₹${metrics.cash.toLocaleString()}`} sub="As of today" color="var(--text-main)" />
+                <StatCard label="GST Liability" value="₹0.00" sub="This quarter" color="var(--accent-amber)" />
               </div>
 
-              <div className="card">
-                <div className="card-title">Total Payables <i className="fas fa-arrow-trend-down" style={{color:'var(--accent-red)'}}></i></div>
-                <div className="insights-grid">
-                  <div className="circle-chart payables-chart"></div>
-                  <div>
-                    <div className="big-amt">₹ {metrics.payables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
-                      <span style={{color: 'var(--text-dim)'}}><i className="fas fa-clock"></i> Pending: <b>₹2,42,250</b></span>
-                      <span style={{color: 'var(--accent-red)'}}><i className="fas fa-bolt"></i> Critical: <b>₹12,250</b></span>
-                    </div>
+              <div className="bottom-row animate-fade">
+                <div className="section-card">
+                  <div className="section-title">Recent Transactions</div>
+                  <div className="transaction-list">
+                    {dashboardData.vouchers.slice(0, 5).map(v => (
+                       <div key={v._id} className="transaction-item" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '0.5px solid rgba(255,255,255,0.05)' }}>
+                        <span className="type-badge" style={{ background: `var(--${v.type.toLowerCase()}-bg)`, color: `var(--accent-${v.type.toLowerCase()})`, fontSize: '10px', fontWeight: '800', padding: '2px 8px', borderRadius: '4px' }}>{v.type}</span>
+                        <span className="party-name" style={{ fontSize: '14px', fontWeight: '600' }}>{v.partyName || v.entries[0]?.ledger || 'Cash'}</span>
+                        <span className="tx-amt" style={{ color: v.type === 'SALES' || v.type === 'RECEIPT' ? 'var(--accent-blue)' : 'var(--accent-amber)', fontSize: '14px', fontWeight: '700', fontFamily: 'monospace' }}>
+                           {v.type === 'SALES' || v.type === 'RECEIPT' ? '+' : '-'} ₹{(v.totalAmount || v.entries[0]?.debit || v.entries[1]?.credit || 0).toLocaleString()}
+                        </span>
+                       </div>
+                    ))}
                   </div>
                 </div>
-              </div>
 
-              <div className="card cash-flow-container grid-2-1" style={{ minHeight: '350px', gridColumn: 'span 2' }}>
-                <div style={{ flex: 3, display: 'flex', flexDirection: 'column' }}>
-                  <div className="card-title" style={{ marginBottom: '10px' }}>CASH FLOW</div>
-                  <div style={{ flex: 1, width: '100%', minHeight: '280px' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={[
-                        { name: 'APR', v: 300 }, { name: 'MAY', v: 1000 }, { name: 'JUN', v: 1000 },
-                        { name: 'JUL', v: 1000 }, { name: 'AUG', v: 1100 }, { name: 'SEP', v: 1500 },
-                        { name: 'OCT', v: 1700 }, { name: 'NOV', v: 1800 }, { name: 'DEC', v: 1950 },
-                        { name: 'JAN', v: 2000 }, { name: 'FEB', v: 2050 }, { name: 'MAR', v: 2100 }
-                      ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                        <defs>
-                          <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#2f81f7" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#2f81f7" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#30363d" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#8b949e'}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#8b949e'}} tickFormatter={(v) => `${v}K`} />
-                        <Tooltip contentStyle={{backgroundColor: '#161b22', border: '1px solid #30363d'}} />
-                        <Area type="monotone" dataKey="v" stroke="#2f81f7" strokeWidth={3} fillOpacity={1} fill="url(#colorVal)" />
-                      </AreaChart>
-                    </ResponsiveContainer>
+                <div className="section-card">
+                  <div className="section-title">Cash flow — this month</div>
+                  <div className="cash-flow-list">
+                    <FlowBar month="Apr" percent="30" color="var(--accent-blue)" />
+                    <FlowBar month="May" percent="55" color="var(--accent-blue)" />
+                    <FlowBar month="Jun" percent="72" color="var(--accent-blue)" />
+                    <FlowBar month="Jul" percent="90" color="var(--accent-teal)" />
+                    <FlowBar month="Aug" percent="65" color="var(--accent-amber)" />
                   </div>
-                </div>
-                
-                <div className="cash-flow-stats" style={{ borderLeft: '1px solid var(--border)', paddingLeft: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '15px' }}>
-                  <div style={{textAlign: 'right'}}><p style={{fontSize: '11px', color: 'var(--text-dim)'}}>Cash as on 01-04-23</p><p style={{fontSize: '16px', fontWeight: '800'}}>₹ 0.00</p></div>
-                  <div style={{textAlign: 'right'}}><p style={{fontSize: '11px', color: 'var(--text-dim)'}}>Incoming</p><p style={{fontSize: '16px', fontWeight: '800', color: 'var(--accent-green)'}}>₹ {metrics.cashIn.toLocaleString('en-IN', { minimumFractionDigits: 2 })} +</p></div>
-                  <div style={{textAlign: 'right'}}><p style={{fontSize: '11px', color: 'var(--text-dim)'}}>Outgoing</p><p style={{fontSize: '16px', fontWeight: '800', color: 'var(--accent-red)'}}>₹ {metrics.cashOut.toLocaleString('en-IN', { minimumFractionDigits: 2 })} -</p></div>
-                  <div style={{textAlign: 'right', borderTop: '1px solid var(--border)', paddingTop: '10px'}}><p style={{fontSize: '11px', color: 'var(--text-dim)'}}>Cash Flow Balance</p><p style={{fontSize: '16px', fontWeight: '800', color: 'var(--accent-blue)'}}>₹ {metrics.cash.toLocaleString('en-IN', { minimumFractionDigits: 2 })} =</p></div>
                 </div>
               </div>
             </>
           ) : (
-            renderReport()
+            <div className="report-container" style={{ padding: '30px' }}>
+              {renderReport()}
+            </div>
           )}
         </div>
         {showSuccessModal && (
@@ -2086,23 +1986,53 @@ const Dashboard = () => {
   );
 };
 
-const MenuItem = ({ icon, label, onClick, shortcut, active, className }) => (
-  <div className={`menu-item ${className || ''}`}>
-    <button className={`nav-btn ${active ? 'active' : ''}`} onClick={onClick}>
-      <i className={icon}></i> 
-      <span>{label}</span>
-      {shortcut && <span className="shortcut-badge">{shortcut}</span>}
-    </button>
+const PhaseLabel = ({ phase, label }) => (
+  <div className={`phase-label phase-${phase}`}>{label}</div>
+);
+
+const SidebarItem = ({ icon, label, shortcut, active, onClick }) => (
+  <button className={`nav-btn ${active ? 'active' : ''}`} onClick={onClick}>
+    <i className={icon} style={{ width: '20px' }}></i>
+    <span>{label}</span>
+    {shortcut && <span className="shortcut-badge">{shortcut}</span>}
+  </button>
+);
+
+const ShortcutPill = ({ badge, label, color, onClick }) => (
+  <button className="shortcut-pill" onClick={onClick}>
+    <span className="pill-badge" style={{ background: color }}>{badge}</span>
+    <span>{label}</span>
+  </button>
+);
+
+const ActionCard = ({ icon, label, shortcut, color, bg, onClick }) => (
+  <div className="action-card" onClick={onClick}>
+    <div className="action-icon-box" style={{ background: bg, color: color }}>
+      <i className={`fas ${icon}`}></i>
+    </div>
+    <div className="action-info">
+      <h5>{label}</h5>
+      <span>{shortcut}</span>
+    </div>
   </div>
 );
 
-MenuItem.propTypes = {
-  icon: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
-  className: PropTypes.string,
-  shortcut: PropTypes.string,
-  active: PropTypes.bool
-};
+const StatCard = ({ label, value, sub, color }) => (
+  <div className="stat-card">
+    <div className="stat-label">{label}</div>
+    <div className="stat-value" style={{ color: color }}>{value}</div>
+    <div className="stat-subtext" style={{ color: color }}>{sub}</div>
+  </div>
+);
+
+const FlowBar = ({ month, percent, color }) => (
+  <div className="flow-bar-row">
+    <span className="flow-month">{month}</span>
+    <div className="flow-bar-bg">
+      <div className="flow-bar-fill" style={{ width: `${percent}%`, background: color }}></div>
+    </div>
+    <span className="flow-percent">{percent}%</span>
+  </div>
+);
 
 export default Dashboard;

@@ -1151,6 +1151,9 @@ const Dashboard = () => {
         </div>
         
         <nav className="nav-group">
+          <div className="nav-label">Main</div>
+          <MenuItem icon="fas fa-home" label="Home" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
+          
           <div className="nav-label">Setup & Creation</div>
           <MenuItem icon="fas fa-plus-circle" label="Company Creation" onClick={() => setActiveTab('COMPANY')} />
           <MenuItem icon="fas fa-book" label="Ledger Creation" onClick={() => setActiveTab('LEDGER')} />
@@ -1158,7 +1161,7 @@ const Dashboard = () => {
           
           <div className="nav-label">Core Transactions</div>
           <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
-            <button className="nav-btn active" onClick={() => toggleMenu('coreTransactions')}>
+            <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
               <i className="fas fa-receipt"></i> Voucher Entry (F7) 
               <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{marginLeft:'auto', fontSize: '10px'}}></i>
             </button>
@@ -1341,9 +1344,9 @@ const Dashboard = () => {
   );
 };
 
-const MenuItem = ({ icon, label, onClick }) => (
+const MenuItem = ({ icon, label, shortcut, active, onClick }) => (
   <div className="menu-item">
-    <button className="nav-btn" onClick={onClick}>
+    <button className={`nav-btn ${active ? 'active' : ''}`} onClick={onClick}>
       <i className={icon}></i> {label}
     </button>
   </div>

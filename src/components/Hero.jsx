@@ -46,7 +46,7 @@ const Hero = () => {
                             window.dispatchEvent(new Event('openSignInModal'));
                         }}
                     >
-                        Sign in nowe <ArrowRight size={18} className="ml-2" style={{ marginLeft: '8px' }} />
+                        Sign in now <ArrowRight size={18} className="ml-2" style={{ marginLeft: '8px' }} />
                     </button>
                     <button
                         className="btn btn-white btn-xl flex-center"

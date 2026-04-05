@@ -22,4 +22,15 @@ router.post('/', protect, async (req, res) => {
     }
 });
 
+router.patch('/:id/status', protect, async (req, res) => {
+    try {
+        const { status } = req.body;
+        const voucher = await Voucher.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        if (!voucher) return res.status(404).json({ message: 'Voucher not found' });
+        res.json(voucher);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+});
+
 module.exports = router;

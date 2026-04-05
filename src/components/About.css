@@ -118,12 +118,33 @@
     margin-bottom: 5rem;
 }
 
+@media (max-width: 991px) {
+    .ab-hero {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+    
+    .ab-hero-content {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    
+    .ab-hero-buttons {
+        justify-content: center;
+    }
+    
+    .ab-hero-trust {
+        justify-content: center;
+    }
+}
+
 .ab-hero-content {
     max-width: 520px;
 }
 
 .ab-headline {
-    font-size: 3.2rem;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
     font-weight: 900;
     color: #0f172a;
     line-height: 1.08;

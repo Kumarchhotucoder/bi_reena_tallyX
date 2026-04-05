@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './Dashboard.css';
 import logoImage from '../../assets/logo.jpeg';
 
@@ -1205,7 +1205,7 @@ const Dashboard = () => {
               <p style={{fontSize: '14px', fontWeight: '800'}}>Manish Pvt Ltd</p>
               <p style={{fontSize: '11px', color: 'var(--accent-green)', fontWeight: '700'}}>FY 2025-26 | Patna</p>
             </div>
-            <img src={`https://ui-avatars.com/api/?name=Admin&background=2f81f7&color=fff&bold=true`} 
+            <img src={`https://ui-avatars.com/api/?name=Admin&background=8b5cf6&color=fff&bold=true`} 
                  style={{width: '42px', borderRadius: '50%', border: '2px solid var(--border)'}} alt="User" />
           </div>
         </header>
@@ -1213,57 +1213,113 @@ const Dashboard = () => {
         <div className="dashboard-container">
           {activeTab === 'DASHBOARD' ? (
             <>
-              <div className="card">
-                <div className="card-title">Total Receivables <i className="fas fa-arrow-trend-up" style={{color:'var(--accent-green)'}}></i></div>
-                <div className="insights-grid">
-                  <div className="circle-chart"></div>
-                  <div>
-                    <div className="big-amt">₹ {metrics.receivables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
-                      <span style={{color: 'var(--accent-blue)'}}><i className="fas fa-check-circle"></i> On Time: <b>₹3,42,250</b></span>
-                      <span style={{color: 'var(--tally-yellow)'}}><i className="fas fa-exclamation-circle"></i> Overdue: <b>₹42,250</b></span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {(() => {
+                const recAmt = metrics.receivables > 0 ? metrics.receivables : 384500;
+                const recOnTime = recAmt * 0.89;
+                const recOverdue = recAmt * 0.11;
+                const recData = [
+                  { name: 'On Time', value: recOnTime, color: '#8b5cf6' },
+                  { name: 'Overdue', value: recOverdue, color: '#ffc107' }
+                ];
+  
+                const payAmt = metrics.payables > 0 ? metrics.payables : 254500;
+                const payPending = payAmt * 0.95;
+                const payCritical = payAmt * 0.05;
+                const payData = [
+                  { name: 'Pending', value: payPending, color: 'url(#pieGradient)' },
+                  { name: 'Critical', value: payCritical, color: '#ff4d4f' }
+                ];
 
-              <div className="card">
-                <div className="card-title">Total Payables <i className="fas fa-arrow-trend-down" style={{color:'var(--accent-red)'}}></i></div>
-                <div className="insights-grid">
-                  <div className="circle-chart payables-chart"></div>
-                  <div>
-                    <div className="big-amt">₹ {metrics.payables.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                    <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
-                      <span style={{color: 'var(--text-dim)'}}><i className="fas fa-clock"></i> Pending: <b>₹2,42,250</b></span>
-                      <span style={{color: 'var(--accent-red)'}}><i className="fas fa-bolt"></i> Critical: <b>₹12,250</b></span>
+                return (
+                  <>
+                    <div className="card" style={{ background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.25) 0%, rgba(236, 72, 153, 0.25) 50%, rgba(139, 92, 246, 0.25) 100%)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                      <div className="card-title">Total Receivables <i className="fas fa-arrow-trend-up" style={{color:'var(--accent-green)'}}></i></div>
+                      <div className="insights-grid">
+                        <div style={{ width: '90px', height: '90px' }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie data={recData} innerRadius={30} outerRadius={45} dataKey="value" stroke="none">
+                                {recData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                              </Pie>
+                              <Tooltip contentStyle={{fontSize: '11px', padding: '4px 8px', borderRadius: '4px', background: isDarkMode?'#161b22':'#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}} itemStyle={{color: isDarkMode?'#fff':'#000'}} formatter={(value) => `₹${value.toLocaleString('en-IN', {maximumFractionDigits: 0})}`}/>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div>
+                          <div className="big-amt">₹ {recAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                          <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
+                            <span style={{color: '#8b5cf6'}}><i className="fas fa-check-circle"></i> On Time: <b>₹{recOnTime.toLocaleString('en-IN', {maximumFractionDigits:0})}</b></span>
+                            <span style={{color: 'var(--tally-yellow)'}}><i className="fas fa-exclamation-circle"></i> Overdue: <b>₹{recOverdue.toLocaleString('en-IN', {maximumFractionDigits:0})}</b></span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              </div>
+
+                    <div className="card" style={{ background: 'linear-gradient(135deg, rgba(251, 146, 60, 0.25) 0%, rgba(236, 72, 153, 0.25) 50%, rgba(139, 92, 246, 0.25) 100%)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+                      <div className="card-title">Total Payables <i className="fas fa-arrow-trend-down" style={{color:'var(--accent-red)'}}></i></div>
+                      <div className="insights-grid">
+                        <div style={{ width: '90px', height: '90px' }}>
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <defs>
+                                <linearGradient id="pieGradient" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#fb923c" />
+                                  <stop offset="50%" stopColor="#ec4899" />
+                                  <stop offset="100%" stopColor="#8b5cf6" />
+                                </linearGradient>
+                              </defs>
+                              <Pie data={payData} innerRadius={30} outerRadius={45} dataKey="value" stroke="none">
+                                {payData.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                              </Pie>
+                              <Tooltip contentStyle={{fontSize: '11px', padding: '4px 8px', borderRadius: '4px', background: isDarkMode?'#161b22':'#fff', border: '1px solid #e2e8f0', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'}} itemStyle={{color: isDarkMode?'#fff':'#000'}} formatter={(value) => `₹${value.toLocaleString('en-IN', {maximumFractionDigits: 0})}`}/>
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <div>
+                          <div className="big-amt">₹ {payAmt.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                          <div style={{display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px'}}>
+                            <span style={{color: 'var(--text-dim)'}}><i className="fas fa-clock"></i> Pending: <b>₹{payPending.toLocaleString('en-IN', {maximumFractionDigits:0})}</b></span>
+                            <span style={{color: 'var(--accent-red)'}}><i className="fas fa-bolt"></i> Critical: <b>₹{payCritical.toLocaleString('en-IN', {maximumFractionDigits:0})}</b></span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                );
+              })()}
 
               <div className="card cash-flow-container" style={{ display: 'flex', gap: '20px', minHeight: '350px', gridColumn: 'span 2' }}>
                 <div style={{ flex: 3, display: 'flex', flexDirection: 'column' }}>
                   <div className="card-title" style={{ marginBottom: '10px' }}>CASH FLOW</div>
                   <div style={{ flex: 1, width: '100%', minHeight: '280px' }}>
                     <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={[
+                      <BarChart data={[
                         { name: 'APR', v: 300 }, { name: 'MAY', v: 1000 }, { name: 'JUN', v: 1000 },
                         { name: 'JUL', v: 1000 }, { name: 'AUG', v: 1100 }, { name: 'SEP', v: 1500 },
                         { name: 'OCT', v: 1700 }, { name: 'NOV', v: 1800 }, { name: 'DEC', v: 1950 },
                         { name: 'JAN', v: 2000 }, { name: 'FEB', v: 2050 }, { name: 'MAR', v: 2100 }
                       ]} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
-                          <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#2f81f7" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#2f81f7" stopOpacity={0}/>
+                          <linearGradient id="barViolet" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#8b5cf6" stopOpacity={0.7} />
+                            <stop offset="100%" stopColor="#8b5cf6" stopOpacity={0.3} />
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#30363d" />
-                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#8b949e'}} />
-                        <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#8b949e'}} tickFormatter={(v) => `${v}K`} />
-                        <Tooltip contentStyle={{backgroundColor: '#161b22', border: '1px solid #30363d'}} />
-                        <Area type="monotone" dataKey="v" stroke="#2f81f7" strokeWidth={3} fillOpacity={1} fill="url(#colorVal)" />
-                      </AreaChart>
+                        <CartesianGrid strokeDasharray="4 4" vertical={false} stroke={isDarkMode ? "#30363d" : "#cbd5e1"} />
+                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: isDarkMode ? '#8b949e' : '#64748b'}} dy={10} />
+                        <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: isDarkMode ? '#8b949e' : '#64748b'}} tickFormatter={(v) => `${v}K`} dx={-10} />
+                        <Tooltip 
+                            contentStyle={{
+                                backgroundColor: isDarkMode ? '#161b22' : '#ffffff', 
+                                border: `1px solid ${isDarkMode ? '#30363d' : '#e2e8f0'}`,
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+                            }} 
+                            cursor={{ fill: isDarkMode ? '#30363d' : '#f1f5f9' }}
+                            itemStyle={{ color: isDarkMode ? '#e6edf3' : '#0f172a', fontWeight: 'bold' }}
+                        />
+                        <Bar dataKey="v" fill="url(#barViolet)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>

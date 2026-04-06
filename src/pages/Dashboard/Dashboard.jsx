@@ -1163,9 +1163,9 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-home" label="Home" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
 
           <div className="nav-label">Setup & Creation</div>
-          <MenuItem icon="fas fa-plus-circle" label="Company Creation" onClick={() => setActiveTab('COMPANY')} />
-          <MenuItem icon="fas fa-book" label="Ledger Creation" onClick={() => setActiveTab('LEDGER')} />
-          <MenuItem icon="fas fa-boxes" label="Stock Entry" onClick={() => setActiveTab('STOCK')} />
+          <MenuItem icon="fas fa-plus-circle" label="Company Creation" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
+          <MenuItem icon="fas fa-book" label="Ledger Creation" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
+          <MenuItem icon="fas fa-boxes" label="Stock Entry" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
 
           <div className="nav-label">Core Transactions</div>
           <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
@@ -1181,14 +1181,14 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <MenuItem icon="fas fa-shopping-cart" label="Sales (F8)" onClick={() => setActiveTab('SALES')} />
-          <MenuItem icon="fas fa-shopping-basket" label="Purchase (F9)" onClick={() => setActiveTab('PURCHASE')} />
-          <MenuItem icon="fas fa-university" label="Banking" onClick={() => setActiveTab('BANKING')} />
+          <MenuItem icon="fas fa-shopping-cart" label="Sales (F8)" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
+          <MenuItem icon="fas fa-shopping-basket" label="Purchase (F9)" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
+          <MenuItem icon="fas fa-university" label="Banking" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
 
           <div className="nav-label">Compliance & Reports</div>
-          <MenuItem icon="fas fa-percentage" label="GST / Taxation" onClick={() => setActiveTab('GST')} />
-          <MenuItem icon="fas fa-chart-line" label="Profit & Loss" onClick={() => setActiveTab('PL')} />
-          <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" onClick={() => setActiveTab('BS')} />
+          <MenuItem icon="fas fa-percentage" label="GST / Taxation" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
+          <MenuItem icon="fas fa-chart-line" label="Profit & Loss" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
+          <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
 
           <div className="nav-label">Utilities</div>
           <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />

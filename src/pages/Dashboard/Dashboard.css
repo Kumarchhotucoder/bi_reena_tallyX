@@ -76,7 +76,8 @@
   /* Pure vertical padding, zero horizontal */
   display: flex;
   align-items: center;
-  justify-content: center; /* Centered as requested */
+  justify-content: center;
+  /* Centered as requested */
   border-bottom: 1px solid rgba(143, 0, 204, 0.08);
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px) saturate(180%);
@@ -94,7 +95,8 @@
   max-height: 90px;
   /* Even bigger branding */
   object-fit: contain;
-  margin: 0 auto; /* Perfect centering */
+  margin: 0 auto;
+  /* Perfect centering */
   transition: 0.4s cubic-bezier(0.23, 1, 0.32, 1);
   filter: brightness(0) saturate(100%) invert(18%) sepia(88%) saturate(5185%) hue-rotate(275deg) brightness(80%) contrast(115%);
   cursor: pointer;
@@ -125,8 +127,7 @@
   cursor: pointer;
   font-size: 13px;
   border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  /* Mist Gray Chassis */
+  border: 2px solid #f0e2ff;
   background: #ffffff;
   color: #000205 !important;
   transition: all 0.35s cubic-bezier(0.19, 1, 0.22, 1);

@@ -6,12 +6,11 @@ const useGlobalShortcuts = (setActiveTab) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Don't trigger shortcuts if user is typing in an input
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName) && e.key !== 'Escape') {
-        // Special case: Alt+G should still focus search even if in another input? 
-        // User didn't specify, but usually shortcuts are disabled in inputs.
-        // Let's stick to the rule.
-        return;
+      // Don't trigger shortcuts if user is typing in an input, UNLESS it's Escape or Alt+C
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+        if (e.key !== 'Escape' && !(e.altKey && e.key.toLowerCase() === 'c')) {
+          return;
+        }
       }
 
       // Functional Keys (F1 - F10)

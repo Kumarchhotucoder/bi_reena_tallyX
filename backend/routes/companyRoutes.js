@@ -45,7 +45,11 @@ router.post('/', protect, async (req, res) => {
         // Check if company with same name already exists for this user
         const existingCompany = await Company.findOne({ name, user: req.user._id });
         if (existingCompany) {
-            return res.status(400).json({ message: 'A company with this name already exists in your account' });
+            return res.status(400).json({ 
+                success: false,
+                message: 'A company with this name already exists in your account',
+                data: existingCompany 
+            });
         }
 
         const company = new Company({

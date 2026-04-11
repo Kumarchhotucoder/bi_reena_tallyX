@@ -270,31 +270,33 @@ const Dashboard = () => {
 
       case 'SALES':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div className="report-header" style={{ background: 'linear-gradient(90deg, rgba(47,129,247,0.1) 0%, transparent 100%)', borderLeft: '4px solid var(--accent-blue)', padding: '15px 20px' }}>
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ color: 'var(--accent-blue)', fontSize: '20px', margin: '0 0 5px 0' }}><i className="fas fa-file-invoice-dollar"></i> Sales Tax Invoice</h3>
-                <span style={{ background: 'var(--accent-blue)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>F8 : VOUCHER</span>
+                <h3 style={{ color: '#8F00CC', fontSize: '20px', margin: '0 0 5px 0', fontWeight: '800' }}><i className="fas fa-file-invoice-dollar" style={{ marginRight: '8px' }}></i> Sales Tax Invoice</h3>
+                <span style={{ background: '#8F00CC', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>F8 : VOUCHER</span>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-main)' }}># INV-25/001</div>
-                <div style={{ color: 'var(--text-dim)', fontSize: '13px' }}><i className="far fa-calendar-alt"></i> 01-Apr-2025</div>
-                <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn" style={{ marginTop: '8px' }}><i className="fas fa-times"></i> Esc: Quit</button>
+              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 'bold', color: '#000000' }}># INV-25/001</div>
+                  <div style={{ color: '#636c76', fontSize: '11px' }}><i className="far fa-calendar-alt"></i> 01-Apr-2025</div>
+                </div>
+                <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
               </div>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderTop: 'none', boxSizing: 'border-box' }}>
+            <div style={{ boxSizing: 'border-box' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}><span>Party A/c Name</span> <span style={{ color: 'var(--accent-blue)' }}>+ Alt C</span></label>
+                  <label style={{ ...labelStyle, color: '#000000' }}><span>Party A/c Name</span> <span style={{ color: '#8F00CC' }}>+ Alt C</span></label>
                   <select style={inputStyle}><option>Rahul Traders (GST: 10AAAAA1234A1Z1)</option><option>Cash</option></select>
                 </div>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Sales Ledger</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Sales Ledger</label>
                   <select style={inputStyle}><option>Sales - Local @ 18%</option><option>Sales - Interstate @ 18%</option></select>
                 </div>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Place of Supply</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Place of Supply</label>
                   <input type="text" style={inputStyle} defaultValue="10 - Bihar" />
                 </div>
               </div>
@@ -308,8 +310,8 @@ const Dashboard = () => {
                       <th style={{ ...thStyle, width: '10%', textAlign: 'center' }}>HSN/SAC</th>
                       <th style={{ ...thStyle, width: '10%', textAlign: 'right' }}>Qty</th>
                       <th style={{ ...thStyle, width: '15%', textAlign: 'right' }}>Rate (₹)</th>
-                      <th style={{ ...thStyle, width: '10%', textAlign: 'right' }}>Disc %</th>
-                      <th style={{ ...thStyle, width: '25%', textAlign: 'right', color: 'var(--accent-blue)' }}>Amount (₹)</th>
+                      <th style={{ ...thStyle, width: '10%' }}>Disc %</th>
+                      <th style={{ ...thStyle, width: '25%', textAlign: 'right', color: '#8F00CC' }}>Amount (₹)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -339,12 +341,20 @@ const Dashboard = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Narration / Remarks:</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Narration / Remarks:</label>
                   <textarea style={{ ...inputStyle, height: '50px', resize: 'none' }} placeholder="Being goods sold on credit..."></textarea>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', boxSizing: 'border-box' }}>
-                  <button style={{ background: 'linear-gradient(135deg, #2f81f7 0%, #1a62cc 100%)', color: 'white', padding: '12px 25px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    <i className="fas fa-check-circle"></i> Save (Ctrl+A)
+                  <button style={{
+                    background: '#efe0ff',
+                    color: '#8F00CC',
+                    padding: '10px 30px',
+                    border: '1px solid #8F00CC',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}>
+                    Save (Ctrl+A)
                   </button>
                 </div>
               </div>
@@ -354,29 +364,31 @@ const Dashboard = () => {
 
       case 'PURCHASE':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div className="report-header" style={{ background: 'linear-gradient(90deg, rgba(40,167,69,0.1) 0%, transparent 100%)', borderLeft: '4px solid var(--accent-green)', padding: '15px 20px' }}>
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ color: 'var(--accent-green)', fontSize: '20px', margin: '0 0 5px 0' }}><i className="fas fa-shopping-basket"></i> Purchase Voucher</h3>
-                <span style={{ background: 'var(--accent-green)', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>F9 : VOUCHER</span>
+                <h3 style={{ color: '#8F00CC', fontSize: '20px', margin: '0 0 5px 0', fontWeight: '800' }}><i className="fas fa-shopping-basket" style={{ marginRight: '8px' }}></i> Purchase Voucher</h3>
+                <span style={{ background: '#8F00CC', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>F9 : VOUCHER</span>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '5px' }}>
-                  <input type="text" style={{ ...inputStyle, width: '130px', padding: '6px', fontSize: '13px' }} placeholder="Sup. Inv No." />
-                  <input type="date" style={{ ...inputStyle, width: '130px', padding: '6px', fontSize: '13px' }} defaultValue="2025-04-01" />
+              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'flex-end', marginBottom: '5px' }}>
+                    <input type="text" style={{ ...inputStyle, width: '130px', padding: '6px', fontSize: '13px' }} placeholder="Sup. Inv No." />
+                    <input type="date" style={{ ...inputStyle, width: '130px', padding: '6px', fontSize: '13px' }} defaultValue="2025-04-01" />
+                  </div>
                 </div>
-                <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn" style={{ marginTop: '5px' }}><i className="fas fa-times"></i> Esc: Quit</button>
+                <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
               </div>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderTop: 'none', boxSizing: 'border-box' }}>
+            <div style={{ boxSizing: 'border-box' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}><span>Party A/c Name</span></label>
+                  <label style={{ ...labelStyle, color: '#000000' }}><span>Party A/c Name</span></label>
                   <select style={inputStyle}><option>XYZ Suppliers (Creditor)</option><option>Cash</option></select>
                 </div>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Purchase Ledger</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Purchase Ledger</label>
                   <select style={inputStyle}><option>Purchase Accounts @ 18%</option></select>
                 </div>
               </div>
@@ -389,7 +401,7 @@ const Dashboard = () => {
                       <th style={{ ...thStyle, width: '15%', textAlign: 'right' }}>Quantity</th>
                       <th style={{ ...thStyle, width: '15%', textAlign: 'right' }}>Rate</th>
                       <th style={{ ...thStyle, width: '10%', textAlign: 'center' }}>Per</th>
-                      <th style={{ ...thStyle, width: '20%', textAlign: 'right', color: 'var(--accent-green)' }}>Amount (₹)</th>
+                      <th style={{ ...thStyle, width: '20%', textAlign: 'right', color: '#8F00CC' }}>Amount (₹)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -410,12 +422,20 @@ const Dashboard = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Narration:</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Narration:</label>
                   <textarea style={{ ...inputStyle, height: '50px', resize: 'none' }} placeholder="Being goods purchased..."></textarea>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', boxSizing: 'border-box' }}>
-                  <button style={{ background: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', color: 'white', padding: '12px 25px', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
-                    <i className="fas fa-save"></i> Save (Ctrl+A)
+                  <button style={{
+                    background: '#efe0ff',
+                    color: '#8F00CC',
+                    padding: '10px 30px',
+                    border: '1px solid #8F00CC',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}>
+                    Save (Ctrl+A)
                   </button>
                 </div>
               </div>
@@ -502,25 +522,25 @@ const Dashboard = () => {
 
       case 'LEDGER':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-book-open" style={{ color: '#ffc107' }}></i> Ledger Creation (Account Masters)</h3>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}>Ledger Creation (Account Masters)</h3>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Quit</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '6px', marginTop: '20px', maxWidth: '850px', margin: '20px auto 0', boxSizing: 'border-box' }}>
+            <div style={{ boxSizing: 'border-box', maxWidth: '850px', margin: '0 auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', boxSizing: 'border-box' }}>
 
                 <div>
-                  <label style={labelStyle}>Name of Ledger</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Name of Ledger</label>
                   <input type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Ramesh & Co." autoFocus />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: 'rgba(0,0,0,0.1)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)', boxSizing: 'border-box' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Under (Group Head)</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Under (Group Head)</label>
                     <select style={inputStyle}>
                       <option>Sundry Debtors</option>
                       <option>Sundry Creditors</option>
@@ -528,7 +548,7 @@ const Dashboard = () => {
                     </select>
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Maintain balances bill-by-bill</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Maintain balances bill-by-bill</label>
                     <select style={inputStyle}>
                       <option>Yes</option>
                       <option>No</option>
@@ -538,19 +558,19 @@ const Dashboard = () => {
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Address / State</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Address / State</label>
                     <textarea style={{ ...inputStyle, resize: 'none', height: '50px', marginBottom: '10px' }}></textarea>
                     <input type="text" style={inputStyle} placeholder="State" />
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Tax Registration (GSTIN)</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Tax Registration (GSTIN)</label>
                     <select style={{ ...inputStyle, marginBottom: '10px' }}><option>Regular</option><option>Unregistered</option></select>
                     <input type="text" style={{ ...inputStyle, textTransform: 'uppercase' }} placeholder="Format: 22AAAAA0000A1Z5" />
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(40,167,69,0.05)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(40,167,69,0.2)', boxSizing: 'border-box' }}>
-                  <label style={{ ...labelStyle, margin: 0, color: 'var(--accent-green)' }}>Opening Balance</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, margin: 0, color: '#8F00CC', fontSize: '14px' }}>Opening Balance</label>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <input type="text" style={{ ...inputStyle, width: '150px', textAlign: 'right', fontWeight: 'bold', margin: 0 }} placeholder="0.00" />
                     <select style={{ ...inputStyle, width: '70px', margin: 0 }}>
@@ -561,7 +581,15 @@ const Dashboard = () => {
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button style={{ background: 'linear-gradient(135deg, #ffc107 0%, #e0a800 100%)', color: '#000', padding: '10px 30px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+                <button style={{
+                  background: '#efe0ff',
+                  color: '#8F00CC',
+                  padding: '10px 30px',
+                  border: '1px solid #8F00CC',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}>
                   Save Ledger (Ctrl+A)
                 </button>
               </div>
@@ -571,50 +599,50 @@ const Dashboard = () => {
 
       case 'STOCK':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-boxes" style={{ color: '#28a745' }}></i> Stock Item Creation (Inventory Master)</h3>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}>Stock Item Creation (Inventory Master)</h3>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Quit</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '6px', marginTop: '20px', maxWidth: '850px', margin: '20px auto 0', boxSizing: 'border-box' }}>
+            <div style={{ boxSizing: 'border-box', maxWidth: '850px', margin: '0 auto' }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '20px', boxSizing: 'border-box' }}>
 
                 <div>
-                  <label style={labelStyle}>Name of Stock Item</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Name of Stock Item</label>
                   <input type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Dell Inspiron 15" autoFocus />
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', background: 'rgba(0,0,0,0.1)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Under (Category / Group)</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Under (Category / Group)</label>
                     <select style={inputStyle}><option>Primary</option><option>Electronics</option></select>
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Units of Measure (UOM)</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Units of Measure (UOM)</label>
                     <select style={inputStyle}><option>Nos (Numbers)</option><option>Pcs (Pieces)</option></select>
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>HSN / SAC Code</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>HSN / SAC Code</label>
                     <input type="text" style={{ ...inputStyle, marginBottom: '10px' }} placeholder="e.g. 8471" />
-                    <label style={labelStyle}>Taxability</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Taxability</label>
                     <select style={inputStyle}><option>Taxable (18%)</option><option>Exempt</option></select>
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
-                    <label style={labelStyle}>Costing Method</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Costing Method</label>
                     <select style={{ ...inputStyle, marginBottom: '10px' }}><option>Average Cost</option><option>FIFO</option></select>
-                    <label style={labelStyle}>Maintain in Batches?</label>
+                    <label style={{ ...labelStyle, color: '#000000' }}>Maintain in Batches?</label>
                     <select style={inputStyle}><option>No</option><option>Yes</option></select>
                   </div>
                 </div>
 
-                <div style={{ marginTop: '10px', background: 'rgba(40,167,69,0.05)', padding: '15px', borderRadius: '6px', border: '1px solid rgba(40,167,69,0.2)', boxSizing: 'border-box' }}>
-                  <label style={{ ...labelStyle, color: 'var(--accent-green)', marginBottom: '10px' }}>Opening Balance</label>
+                <div style={{ boxSizing: 'border-box' }}>
+                  <h4 style={{ color: '#8F00CC', marginBottom: '15px' }}>Opening Balance</h4>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', boxSizing: 'border-box' }}>
                     <div style={{ boxSizing: 'border-box' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Quantity</label>
@@ -632,8 +660,16 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-                <button style={{ background: 'linear-gradient(135deg, #28a745 0%, #1e7e34 100%)', color: '#fff', padding: '10px 30px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
+                <button style={{
+                  background: '#efe0ff',
+                  color: '#8F00CC',
+                  padding: '10px 30px',
+                  border: '1px solid #8F00CC',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}>
                   Save Item (Ctrl+A)
                 </button>
               </div>
@@ -645,30 +681,32 @@ const Dashboard = () => {
       case 'RECEIPT':
       case 'CONTRA':
       case 'JOURNAL':
-        let vColor2 = '#ffc107'; let vIcon2 = 'fa-money-bill-wave';
-        if (activeTab === 'RECEIPT') { vColor2 = '#17a2b8'; vIcon2 = 'fa-hand-holding-usd'; }
-        if (activeTab === 'CONTRA') { vColor2 = '#e83e8c'; vIcon2 = 'fa-exchange-alt'; }
-        if (activeTab === 'JOURNAL') { vColor2 = '#6f42c1'; vIcon2 = 'fa-book-open'; }
+        let vIcon2 = 'fa-money-bill-wave';
+        if (activeTab === 'RECEIPT') { vIcon2 = 'fa-hand-holding-usd'; }
+        if (activeTab === 'CONTRA') { vIcon2 = 'fa-exchange-alt'; }
+        if (activeTab === 'JOURNAL') { vIcon2 = 'fa-book-open'; }
 
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
-            <div className="report-header" style={{ borderBottom: `2px solid ${vColor2}`, paddingBottom: '10px' }}>
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ color: vColor2 }}><i className={`fas ${vIcon2}`}></i> {activeTab} Voucher</h3>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className={`fas ${vIcon2}`} style={{ marginRight: '8px' }}></i>{activeTab} Voucher</h3>
               </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 'bold' }}>No. 001</div>
-                <div style={{ color: 'var(--text-dim)', fontSize: '13px' }}>1-Apr-25</div>
-                <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn" style={{ marginTop: '5px' }}><i className="fas fa-times"></i> Esc: Quit</button>
+              <div style={{ textAlign: 'right', display: 'flex', alignItems: 'center', gap: '15px' }}>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 'bold', color: '#000000', fontSize: '14px' }}>No. 001</div>
+                  <div style={{ color: '#636c76', fontSize: '11px' }}>1-Apr-25</div>
+                </div>
+                <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
               </div>
             </div>
 
-            <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderTop: 'none', boxSizing: 'border-box' }}>
+            <div style={{ boxSizing: 'border-box' }}>
               {activeTab !== 'JOURNAL' && (
-                <div style={{ background: 'rgba(0,0,0,0.2)', padding: '15px', borderRadius: '6px', marginBottom: '20px', boxSizing: 'border-box' }}>
-                  <label style={{ ...labelStyle, color: vColor2 }}>Account (Cash / Bank)</label>
+                <div style={{ padding: '15px', background: '#e2e8f0', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '20px', boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, color: '#475569' }}>ACCOUNT (CASH / BANK)</label>
                   <select style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }}><option>Cash</option><option>HDFC Bank Current A/c</option></select>
-                  <div style={{ fontSize: '12px', color: 'var(--accent-green)', marginTop: '5px' }}>Cur Bal: ₹ 1,12,000.00 Dr</div>
+                  <div style={{ fontSize: '12px', color: '#16a34a', marginTop: '5px', fontWeight: '600' }}>Cur Bal: ₹ 1,12,000.00 Dr</div>
                 </div>
               )}
 
@@ -707,11 +745,19 @@ const Dashboard = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', marginTop: '20px', boxSizing: 'border-box' }}>
                 <div style={{ boxSizing: 'border-box' }}>
-                  <label style={labelStyle}>Narration:</label>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Narration:</label>
                   <textarea style={{ ...inputStyle, height: '50px', resize: 'none' }} placeholder="Enter details..."></textarea>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', boxSizing: 'border-box' }}>
-                  <button style={{ background: vColor2, color: activeTab === 'PAYMENT' ? '#000' : '#fff', padding: '12px 25px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Save (Ctrl+A)</button>
+                  <button style={{
+                    background: '#efe0ff',
+                    color: '#8F00CC',
+                    padding: '10px 30px',
+                    border: '1px solid #8F00CC',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}>Save (Ctrl+A)</button>
                 </div>
               </div>
             </div>
@@ -720,29 +766,29 @@ const Dashboard = () => {
 
       case 'BANKING':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3 style={{ fontSize: '20px' }}><i className="fas fa-university" style={{ color: '#007bff' }}></i> Banking Utilities</h3>
-                <p className="report-subtitle">Reconciliation, Cheque Management & E-Payments</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-university" style={{ marginRight: '8px' }}></i> Banking Utilities</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Reconciliation, Cheque Management & E-Payments</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
             <div className="ledger-split" style={{ marginTop: '20px', gap: '20px' }}>
-              <div className="ledger-side" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
-                <div className="ledger-head" style={{ background: 'rgba(0,123,255,0.1)', color: '#007bff', borderRadius: '6px 6px 0 0' }}>Bank Operations</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><i className="fas fa-money-check" style={{ marginRight: '10px', color: 'var(--text-dim)' }}></i> <span>Cheque Printing</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><i className="fas fa-book" style={{ marginRight: '10px', color: 'var(--text-dim)' }}></i> <span>Cheque Register</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><i className="fas fa-sync-alt" style={{ marginRight: '10px', color: 'var(--accent-green)' }}></i> <span style={{ color: 'var(--text-main)' }}>Bank Reconciliation (BRS)</span></div>
+              <div className="ledger-side" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                <div className="ledger-head" style={{ background: '#efe0ff', color: '#8F00CC', padding: '10px 15px', fontWeight: 'bold', borderRadius: '6px 6px 0 0' }}>Bank Operations</div>
+                <div className="ledger-body" style={{ padding: '15px', background: '#fff', borderRadius: '0 0 6px 6px' }}>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><i className="fas fa-money-check" style={{ marginRight: '10px', color: '#636c76' }}></i> <span>Cheque Printing</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><i className="fas fa-book" style={{ marginRight: '10px', color: '#636c76' }}></i> <span>Cheque Register</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', color: '#000000' }}><i className="fas fa-sync-alt" style={{ marginRight: '10px', color: '#8F00CC' }}></i> <span>Bank Reconciliation (BRS)</span></div>
                 </div>
               </div>
-              <div className="ledger-side" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '6px' }}>
-                <div className="ledger-head" style={{ background: 'rgba(40,167,69,0.1)', color: 'var(--accent-green)', borderRadius: '6px 6px 0 0' }}>Payments & Statements</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><i className="fas fa-file-invoice" style={{ marginRight: '10px', color: 'var(--text-dim)' }}></i> <span>Deposit Slip</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}><i className="fas fa-envelope-open-text" style={{ marginRight: '10px', color: 'var(--text-dim)' }}></i> <span>Payment Advice</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><i className="fas fa-calendar-check" style={{ marginRight: '10px', color: 'var(--tally-yellow)' }}></i> <span>Post-Dated Summary (PDC)</span></div>
+              <div className="ledger-side" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                <div className="ledger-head" style={{ background: '#efe0ff', color: '#8F00CC', padding: '10px 15px', fontWeight: 'bold', borderRadius: '6px 6px 0 0' }}>Payments & Statements</div>
+                <div className="ledger-body" style={{ padding: '15px', background: '#fff', borderRadius: '0 0 6px 6px' }}>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><i className="fas fa-file-invoice" style={{ marginRight: '10px', color: '#636c76' }}></i> <span>Deposit Slip</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><i className="fas fa-envelope-open-text" style={{ marginRight: '10px', color: '#636c76' }}></i> <span>Payment Advice</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', color: '#000000' }}><i className="fas fa-calendar-check" style={{ marginRight: '10px', color: '#8F00CC' }}></i> <span>Post-Dated Summary (PDC)</span></div>
                 </div>
               </div>
             </div>
@@ -753,13 +799,13 @@ const Dashboard = () => {
 
       case 'GST':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-percentage" style={{ color: '#ffc107' }}></i> GSTR-1 & Taxation Summary</h3>
-                <p className="report-subtitle">For the period: 01-Apr-2025 to 31-Mar-2026</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-percentage" style={{ marginRight: '8px' }}></i> GSTR-1 & Taxation Summary</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>For the period: 01-Apr-2025 to 31-Mar-2026</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
 
             <div className="report-summary-cards">
@@ -831,13 +877,13 @@ const Dashboard = () => {
 
       case 'PL':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-chart-line" style={{ color: '#28a745' }}></i> Profit & Loss A/c</h3>
-                <p className="report-subtitle">Manish Pvt Ltd | As of 31-Mar-2026</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-chart-line" style={{ marginRight: '8px' }}></i> Profit & Loss A/c</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Manish Pvt Ltd | As of 31-Mar-2026</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
 
             <div className="ledger-split">
@@ -877,13 +923,13 @@ const Dashboard = () => {
 
       case 'BS':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-balance-scale" style={{ color: '#007bff' }}></i> Balance Sheet</h3>
-                <p className="report-subtitle">Manish Pvt Ltd | As of 31-Mar-2026</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-balance-scale" style={{ marginRight: '8px' }}></i> Balance Sheet</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Manish Pvt Ltd | As of 31-Mar-2026</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
 
             <div className="ledger-split">
@@ -928,13 +974,13 @@ const Dashboard = () => {
 
       case 'PRINT':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-print" style={{ color: '#17a2b8' }}></i> Printing & Export</h3>
-                <p className="report-subtitle">Manish Pvt Ltd | Configuration</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-print" style={{ marginRight: '8px' }}></i> Printing & Export</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Manish Pvt Ltd | Configuration</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
             <div style={{ marginTop: '20px' }}>
               <table className="report-table premium-table">
@@ -954,32 +1000,32 @@ const Dashboard = () => {
 
       case 'BACKUP':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-sync" style={{ color: '#ffc107' }}></i> Backup & Restore</h3>
-                <p className="report-subtitle">Secure your Company Data</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-sync" style={{ marginRight: '8px' }}></i> Backup & Restore</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Secure your Company Data</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
-            <div style={{ padding: '25px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '8px', marginTop: '20px' }}>
-              <h4 style={{ color: 'var(--accent-blue)', marginBottom: '20px', fontSize: '18px' }}>Backup Details</h4>
+            <div style={{ padding: '25px', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '8px', marginTop: '20px' }}>
+              <h4 style={{ color: '#8F00CC', marginBottom: '20px', fontSize: '18px' }}>Backup Details</h4>
               <div style={{ display: 'grid', gap: '20px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Source Path :</span>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--text-dim)' }}>C:\TallyPrime\Data</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '10px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#000000' }}>Source Path :</span>
+                  <span style={{ fontFamily: 'monospace', color: '#636c76' }}>C:\TallyPrime\Data</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed var(--border)', paddingBottom: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Destination Path :</span>
-                  <span style={{ fontFamily: 'monospace', color: 'var(--text-dim)' }}>D:\TallyBackups\2026</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '10px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#000000' }}>Destination Path :</span>
+                  <span style={{ fontFamily: 'monospace', color: '#636c76' }}>D:\TallyBackups\2026</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                  <span style={{ fontWeight: 'bold' }}>Company Name :</span>
-                  <span style={{ fontWeight: 'bold' }}>Manish Pvt Ltd (10000)</span>
+                  <span style={{ fontWeight: 'bold', color: '#000000' }}>Company Name :</span>
+                  <span style={{ fontWeight: 'bold', color: '#000000' }}>Manish Pvt Ltd (10000)</span>
                 </div>
                 <div style={{ display: 'flex', gap: '15px', marginTop: '20px' }}>
-                  <button style={{ background: 'var(--accent-blue)', color: 'white', padding: '12px 20px', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Start Backup (Enter)</button>
-                  <button style={{ background: 'transparent', color: 'var(--text-main)', border: '1px solid var(--border)', padding: '12px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Restore Data</button>
+                  <button style={{ background: '#efe0ff', color: '#8F00CC', padding: '12px 20px', border: '1px solid #8F00CC', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Start Backup (Enter)</button>
+                  <button style={{ background: 'transparent', color: '#8F00CC', border: '1px solid #8F00CC', padding: '12px 20px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', flex: 1 }}>Restore Data</button>
                 </div>
               </div>
             </div>
@@ -988,29 +1034,29 @@ const Dashboard = () => {
 
       case 'IMPORT':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box' }}>
-            <div className="report-header">
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <h3><i className="fas fa-file-import" style={{ color: '#e83e8c' }}></i> Import & Export Data</h3>
-                <p className="report-subtitle">Masters & Vouchers Sync</p>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-file-import" style={{ marginRight: '8px' }}></i> Import & Export Data</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Masters & Vouchers Sync</p>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
             </div>
             <div className="ledger-split" style={{ marginTop: '20px' }}>
-              <div className="ledger-side border-right">
-                <div className="ledger-head">Import Data</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Masters (XML)</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Vouchers (XML)</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><span>Bank Statement (Excel/CSV)</span></div>
+              <div className="ledger-side" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                <div className="ledger-head" style={{ background: '#efe0ff', color: '#8F00CC', padding: '10px 15px', fontWeight: 'bold', borderRadius: '6px 6px 0 0' }}>Import Data</div>
+                <div className="ledger-body" style={{ padding: '15px', background: '#fff', borderRadius: '0 0 6px 6px' }}>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><span>Masters (XML)</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><span>Vouchers (XML)</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', color: '#000000' }}><span>Bank Statement (Excel/CSV)</span></div>
                 </div>
               </div>
-              <div className="ledger-side">
-                <div className="ledger-head">Export Data</div>
-                <div className="ledger-body" style={{ padding: '15px' }}>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>All Masters</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid var(--border)' }}><span>Day Book Vouchers</span></div>
-                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px' }}><span>Tally e-Way Bill Data</span></div>
+              <div className="ledger-side" style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                <div className="ledger-head" style={{ background: '#efe0ff', color: '#8F00CC', padding: '10px 15px', fontWeight: 'bold', borderRadius: '6px 6px 0 0' }}>Export Data</div>
+                <div className="ledger-body" style={{ padding: '15px', background: '#fff', borderRadius: '0 0 6px 6px' }}>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><span>All Masters</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', borderBottom: '1px solid #e2e8f0', color: '#000000' }}><span>Day Book Vouchers</span></div>
+                  <div className="ledger-row fw-bold" style={{ cursor: 'pointer', padding: '10px', color: '#000000' }}><span>Tally e-Way Bill Data</span></div>
                 </div>
               </div>
             </div>
@@ -1196,9 +1242,9 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
           <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
 
-          <div style={{ 
-            padding: '24px 25px', 
-            marginTop: 'auto', 
+          <div style={{
+            padding: '24px 25px',
+            marginTop: 'auto',
             borderTop: '1px solid rgba(143, 0, 204, 0.08)',
             background: 'rgba(255, 255, 255, 0.5)',
             backdropFilter: 'blur(10px)'

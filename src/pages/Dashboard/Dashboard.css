@@ -1162,9 +1162,9 @@
 }
 
 .profile-nav-item.active {
-  color: var(--accent-blue);
-  background: rgba(47, 129, 247, 0.1);
-  border-left: 3px solid var(--accent-blue);
+  color: #8F00CC;
+  background: #efe0ff;
+  border-left: 3px solid #8F00CC;
 }
 
 .profile-sub-nav {
@@ -1181,7 +1181,7 @@
 }
 
 .profile-sub-nav span.active {
-  color: var(--accent-blue);
+  color: #8F00CC;
   font-weight: 600;
 }
 
@@ -1206,11 +1206,12 @@
 }
 
 .profile-back-btn {
-  background: var(--glass);
-  border: 1px solid var(--border);
+  background: #cc0000;
+  border: none;
   padding: 8px 16px;
   border-radius: 6px;
-  color: var(--text-main);
+  color: #fff;
+  font-weight: bold;
   cursor: pointer;
 }
 
@@ -1243,7 +1244,7 @@
 .profile-avatar-large {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #2f81f7, #6e40d8);
+  background: linear-gradient(135deg, #8F00CC, #a855f7);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1251,7 +1252,7 @@
   font-size: 32px;
   font-weight: 800;
   color: white;
-  box-shadow: 0 5px 15px rgba(47, 129, 247, 0.3);
+  box-shadow: 0 5px 15px rgba(143, 0, 204, 0.3);
 }
 
 .profile-hero-info h3 {
@@ -1265,7 +1266,7 @@
 }
 
 .profile-edit-btn {
-  background: var(--accent-green);
+  background: #8F00CC;
   color: white;
   border: none;
   padding: 10px 24px;
@@ -1331,7 +1332,7 @@
 }
 
 .profile-action-card:hover {
-  border-color: var(--accent-blue);
+  border-color: #8F00CC;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
@@ -1352,8 +1353,8 @@
 }
 
 .email-icon {
-  background: rgba(47, 129, 247, 0.1);
-  color: var(--accent-blue);
+  background: #efe0ff;
+  color: #8F00CC;
 }
 
 .phone-icon {
@@ -1386,7 +1387,7 @@
 .profile-add-link {
   background: none;
   border: none;
-  color: var(--accent-blue);
+  color: #8F00CC;
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;

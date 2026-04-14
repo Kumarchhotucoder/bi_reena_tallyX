@@ -7,7 +7,7 @@ import logoImage from '../../assets/logo.jpeg';
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [openMenus, setOpenMenus] = useState({ coreTransactions: true });
+  const [openMenus, setOpenMenus] = useState({ coreTransactions: true, ledgerMasters: false });
   const [activeTab, setActiveTab] = useState('GATEWAY');
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [dashboardData, setDashboardData] = useState({ ledgers: [], stocks: [], vouchers: [] });
@@ -19,6 +19,18 @@ const Dashboard = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const storedCompany = localStorage.getItem('tallyx_company_name');
   const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: storedCompany || '' });
+  
+  // Refs for auto-focusing primary inputs
+  const companyNameRef = useRef(null);
+  const ledgerNameRef = useRef(null);
+  const stockNameRef = useRef(null);
+
+  // Auto-focus logic when activeTab changes
+  useEffect(() => {
+    if (activeTab === 'COMPANY') { setTimeout(() => companyNameRef.current?.focus(), 100); }
+    else if (activeTab === 'LEDGER') { setTimeout(() => ledgerNameRef.current?.focus(), 100); }
+    else if (activeTab === 'STOCK') { setTimeout(() => stockNameRef.current?.focus(), 100); }
+  }, [activeTab]);
 
   // Company Form State
   const [companyForm, setCompanyForm] = useState({
@@ -131,10 +143,26 @@ const Dashboard = () => {
       else if (e.altKey && key.toLowerCase() === 'i') { e.preventDefault(); setActiveTab('IMPORT'); }
       else if (e.altKey && key.toLowerCase() === 'u') { e.preventDefault(); setActiveTab('PROFILE'); }
       else if (e.altKey && key.toLowerCase() === 'l') { e.preventDefault(); handleLogout(); }
+      else if (e.altKey && key.toLowerCase() === 'c') { 
+        e.preventDefault(); 
+        setOpenMenus(prev => ({ ...prev, ledgerMasters: true })); 
+        setActiveTab('LEDGER'); 
+      }
+
+      // Contextual Ledger Shortcuts (when Ledger menu is open)
+      if (openMenus.ledgerMasters && !e.ctrlKey && !e.altKey) {
+        if (key.toLowerCase() === 'c') { setActiveTab('LEDGER'); return; }
+        if (key.toLowerCase() === 'd') { setActiveTab('LEDGER_DISPLAY'); return; }
+        if (key.toLowerCase() === 'a') { setActiveTab('LEDGER_ALTER'); return; }
+        if (key.toLowerCase() === 'r') { setActiveTab('MULTI_LEDGER_CREATE'); return; }
+        if (key.toLowerCase() === 'i') { setActiveTab('MULTI_LEDGER_DISPLAY'); return; }
+        if (key.toLowerCase() === 'l') { setActiveTab('MULTI_LEDGER_ALTER'); return; }
+        if (key.toLowerCase() === 'q') { setOpenMenus(prev => ({ ...prev, ledgerMasters: false })); return; }
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab, companyForm, voucherForm]); // Added states to dependencies to ensure handlers have latest values
+  }, [activeTab, companyForm, voucherForm, openMenus]); // Added openMenus to dependencies
 
   const fetchCompanies = async () => {
     try {
@@ -545,13 +573,13 @@ const Dashboard = () => {
                     <div style={{ marginBottom: '15px' }}>
                       <label style={{ ...labelStyle, color: '#000000' }}>Company Name</label>
                       <input 
+                        ref={companyNameRef}
                         type="text" 
                         name="name"
                         value={companyForm.name}
                         onChange={handleCompanyChange}
                         style={{ ...inputStyle, fontWeight: 'bold' }} 
                         placeholder="e.g. Manish Pvt Ltd" 
-                        autoFocus 
                         required
                       />
                     </div>
@@ -682,7 +710,7 @@ const Dashboard = () => {
 
                 <div>
                   <label style={{ ...labelStyle, color: '#000000' }}>Name of Ledger</label>
-                  <input type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Ramesh & Co." autoFocus />
+                  <input ref={ledgerNameRef} type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Ramesh & Co." />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
@@ -743,6 +771,20 @@ const Dashboard = () => {
             </div>
           </div>
         );
+      
+      case 'LEDGER_DISPLAY':
+      case 'LEDGER_ALTER':
+      case 'MULTI_LEDGER_CREATE':
+      case 'MULTI_LEDGER_DISPLAY':
+      case 'MULTI_LEDGER_ALTER':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px', textAlign: 'center' }}>
+             <i className="fas fa-tools" style={{ fontSize: '50px', color: '#8F00CC', marginBottom: '20px', opacity: 0.3 }}></i>
+             <h3 style={{ color: '#000', fontSize: '20px', fontWeight: '800' }}>{activeTab.split('_').join(' ')}</h3>
+             <p style={{ color: '#636c76' }}>The <strong>{activeTab.split('_').join(' ')}</strong> module is currently being optimized for the Elite Modern interface.</p>
+             <button onClick={() => setActiveTab('LEDGER')} style={{ marginTop: '20px', background: '#8F00CC', color: '#fff', border: 'none', padding: '10px 25px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Back to Creation</button>
+          </div>
+        );
 
       case 'STOCK':
         return (
@@ -759,7 +801,7 @@ const Dashboard = () => {
 
                 <div>
                   <label style={{ ...labelStyle, color: '#000000' }}>Name of Stock Item</label>
-                  <input type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Dell Inspiron 15" autoFocus />
+                  <input ref={stockNameRef} type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Dell Inspiron 15" />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
@@ -1368,7 +1410,44 @@ const Dashboard = () => {
 
               <div className="nav-label">Setup & Creation</div>
               <MenuItem icon="fas fa-plus-circle" label="Company Creation" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
-              <MenuItem icon="fas fa-book" label="Ledger Creation" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
+              
+              <div className={`menu-item ${openMenus.ledgerMasters ? 'open' : ''}`}>
+                <button 
+                  className={`nav-btn ${activeTab.includes('LEDGER') ? 'active' : ''}`} 
+                  onClick={() => toggleMenu('ledgerMasters')}
+                >
+                  <i className="fas fa-book"></i> Ledger Creation
+                  <i className={`fas fa-chevron-${openMenus.ledgerMasters ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
+                </button>
+                <div className="sub-menu">
+                  <div style={{ padding: '8px 15px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Single Ledger</div>
+                  <button className={`sub-btn ${activeTab === 'LEDGER' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER')}>
+                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>C</span>reate
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'LEDGER_DISPLAY' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER_DISPLAY')}>
+                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>D</span>isplay
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'LEDGER_ALTER' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER_ALTER')}>
+                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>A</span>lter
+                  </button>
+
+                  <div style={{ padding: '12px 15px 8px 15px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Multiple Ledgers</div>
+                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_CREATE' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_CREATE')}>
+                    C<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>R</span>eate
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_DISPLAY' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_DISPLAY')}>
+                    D<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>I</span>splay
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_ALTER' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_ALTER')}>
+                    A<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>L</span>Ter
+                  </button>
+                  
+                  <button className="sub-btn" onClick={() => toggleMenu('ledgerMasters')} style={{ marginTop: '5px', borderTop: '1px solid rgba(143, 0, 204, 0.05)' }}>
+                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>Q</span>uit
+                  </button>
+                </div>
+              </div>
+              
               <MenuItem icon="fas fa-boxes" label="Stock Entry" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
 
               <div className="nav-label">Core Transactions</div>
@@ -1588,9 +1667,75 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+
+      {/* 🚀 ADVANCED SHORTCUT HUD (Elite Modern) */}
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px) saturate(180%)',
+        border: '1px solid rgba(143, 0, 204, 0.15)',
+        borderRadius: '16px',
+        padding: '12px 24px',
+        display: 'flex',
+        gap: '20px',
+        alignItems: 'center',
+        boxShadow: '0 10px 40px rgba(143, 0, 204, 0.12)',
+        zIndex: 1000,
+        opacity: activeTab === 'DASHBOARD' && !openMenus.ledgerMasters ? 0.3 : 1,
+        transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
+        pointerEvents: 'none'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#8F00CC', fontWeight: '800', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <i className="fas fa-keyboard"></i> Live Shortcuts:
+        </div>
+        
+        <div style={{ height: '20px', width: '1px', background: 'rgba(143, 0, 204, 0.2)' }}></div>
+
+        <div style={{ display: 'flex', gap: '15px' }}>
+          {openMenus.ledgerMasters ? (
+            <>
+              <HUDKey k="C" label="Create" />
+              <HUDKey k="D" label="Display" />
+              <HUDKey k="A" label="Alter" />
+              <HUDKey k="Q" label="Close" color="#ff4d4d" />
+            </>
+          ) : activeTab === 'DASHBOARD' ? (
+            <>
+              <HUDKey k="Alt+C" label="Quick Ledger" />
+              <HUDKey k="F1-F12" label="Modules" />
+              <HUDKey k="G" label="Go To" />
+            </>
+          ) : (
+             <>
+               <HUDKey k="Ctrl+A" label="Accept / Save" color="#8F00CC" />
+               <HUDKey k="Esc" label="Back to Menu" color="#ff4d4d" />
+             </>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
+
+const HUDKey = ({ k, label, color = '#333' }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+    <kbd style={{
+      background: 'linear-gradient(180deg, #fff 0%, #f0f0f0 100%)',
+      border: '1px solid #ccc',
+      borderBottom: '3px solid #bbb',
+      borderRadius: '4px',
+      padding: '2px 6px',
+      fontSize: '10px',
+      fontWeight: '900',
+      color: color,
+      boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+    }}>{k}</kbd>
+    <span style={{ fontSize: '11px', fontWeight: '600', color: '#666' }}>{label}</span>
+  </div>
+);
 
 const MenuItem = ({ icon, label, shortcut, active, onClick }) => (
   <div className="menu-item">

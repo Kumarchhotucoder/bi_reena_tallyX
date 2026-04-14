@@ -24,12 +24,13 @@ const Dashboard = () => {
     name: '',
     mailingName: '',
     address: '',
-    state: '',
+    state: 'Bihar',
     country: 'India',
     pin: '',
     phone: '',
     email: '',
     gstinUin: '',
+    pan: '',
     fyFrom: '2025-04-01',
     booksFrom: '2025-04-01',
     securityPassword: ''
@@ -82,8 +83,20 @@ const Dashboard = () => {
   // Keyboard Shortcut Handler
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
       const key = e.key;
+
+      // 🚀 Ctrl+A: Accept/Save across all screens
+      if (e.ctrlKey && key.toLowerCase() === 'a') {
+        e.preventDefault();
+        if (activeTab === 'COMPANY') { handleCompanySubmit(e); }
+        else if (activeTab === 'LEDGER') { /* handleLedgerSubmit(e) - to be implemented */ }
+        else if (activeTab === 'STOCK') { /* handleStockSubmit(e) - to be implemented */ }
+        else if (['PAYMENT', 'RECEIPT', 'CONTRA', 'JOURNAL'].includes(activeTab)) { handleVoucherSubmit(e); }
+        return;
+      }
+
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      
       if (key === 'Escape') { setActiveTab('DASHBOARD'); return; }
       // Import/Export sub-shortcuts (1-6) when on IMPORT page
       if (activeTab === 'IMPORT' && !e.altKey && !e.ctrlKey) {
@@ -120,7 +133,7 @@ const Dashboard = () => {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [activeTab]);
+  }, [activeTab, companyForm, voucherForm]); // Added states to dependencies to ensure handlers have latest values
 
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
@@ -454,68 +467,130 @@ const Dashboard = () => {
             </div>
 
             <div style={{ padding: '20px', background: 'var(--card-bg)', border: '1px solid var(--border)', borderRadius: '6px', marginTop: '20px', boxSizing: 'border-box' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', boxSizing: 'border-box' }}>
+              <form onSubmit={handleCompanySubmit}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', boxSizing: 'border-box' }}>
 
-                <div style={{ boxSizing: 'border-box' }}>
-                  <h4 style={{ color: '#8F00CC', marginBottom: '15px' }}>Directory & Name</h4>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ ...labelStyle, color: '#000000' }}>Company Name</label>
-                    <input type="text" style={{ ...inputStyle, fontWeight: 'bold' }} placeholder="e.g. Manish Pvt Ltd" autoFocus />
-                  </div>
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ ...labelStyle, color: '#000000' }}>Registered Address</label>
-                    <textarea style={{ ...inputStyle, resize: 'none', height: '60px' }}></textarea>
-                  </div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                    <div>
-                      <label style={{ ...labelStyle, color: '#000000' }}>State</label>
-                      <select style={inputStyle}><option>Bihar</option><option>Delhi</option></select>
+                  <div style={{ boxSizing: 'border-box' }}>
+                    <h4 style={{ color: '#8F00CC', marginBottom: '15px' }}>Directory & Name</h4>
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ ...labelStyle, color: '#000000' }}>Company Name</label>
+                      <input 
+                        type="text" 
+                        name="name"
+                        value={companyForm.name}
+                        onChange={handleCompanyChange}
+                        style={{ ...inputStyle, fontWeight: 'bold' }} 
+                        placeholder="e.g. Manish Pvt Ltd" 
+                        autoFocus 
+                        required
+                      />
                     </div>
-                    <div>
-                      <label style={{ ...labelStyle, color: '#000000' }}>PIN Code</label>
-                      <input type="text" style={inputStyle} placeholder="800001" />
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ ...labelStyle, color: '#000000' }}>Registered Address</label>
+                      <textarea 
+                        name="address"
+                        value={companyForm.address}
+                        onChange={handleCompanyChange}
+                        style={{ ...inputStyle, resize: 'none', height: '60px' }}
+                      ></textarea>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                      <div>
+                        <label style={{ ...labelStyle, color: '#000000' }}>State</label>
+                        <select 
+                          name="state"
+                          value={companyForm.state}
+                          onChange={handleCompanyChange}
+                          style={inputStyle}
+                        >
+                          <option value="Bihar">Bihar</option>
+                          <option value="Delhi">Delhi</option>
+                          <option value="Maharashtra">Maharashtra</option>
+                          <option value="Karnataka">Karnataka</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style={{ ...labelStyle, color: '#000000' }}>PIN Code</label>
+                        <input 
+                          type="text" 
+                          name="pin"
+                          value={companyForm.pin}
+                          onChange={handleCompanyChange}
+                          style={inputStyle} 
+                          placeholder="800001" 
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ boxSizing: 'border-box' }}>
+                    <h4 style={{ color: '#8F00CC', marginBottom: '15px' }}>Compliance & Books</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                      <div>
+                        <label style={{ ...labelStyle, color: '#000000' }}>Financial Year from</label>
+                        <input 
+                          type="date" 
+                          name="fyFrom"
+                          value={companyForm.fyFrom}
+                          onChange={handleCompanyChange}
+                          style={inputStyle} 
+                        />
+                      </div>
+                      <div>
+                        <label style={{ ...labelStyle, color: '#000000' }}>Books beginning from</label>
+                        <input 
+                          type="date" 
+                          name="booksFrom"
+                          value={companyForm.booksFrom}
+                          onChange={handleCompanyChange}
+                          style={inputStyle} 
+                        />
+                      </div>
+                    </div>
+
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ ...labelStyle, color: '#000000' }}>GSTIN / UIN</label>
+                      <input 
+                        type="text" 
+                        name="gstinUin"
+                        value={companyForm.gstinUin}
+                        onChange={handleCompanyChange}
+                        style={{ ...inputStyle, textTransform: 'uppercase' }} 
+                        placeholder="22AAAAA0000A1Z5" 
+                      />
+                    </div>
+
+                    <div style={{ marginBottom: '15px' }}>
+                      <label style={{ ...labelStyle, color: '#000000' }}>PAN / IT No.</label>
+                      <input 
+                        type="text" 
+                        name="pan"
+                        value={companyForm.pan}
+                        onChange={handleCompanyChange}
+                        style={{ ...inputStyle, textTransform: 'uppercase' }} 
+                        placeholder="ABCDE1234F" 
+                      />
                     </div>
                   </div>
                 </div>
 
-                <div style={{ boxSizing: 'border-box' }}>
-                  <h4 style={{ color: '#8F00CC', marginBottom: '15px' }}>Compliance & Books</h4>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
-                    <div>
-                      <label style={{ ...labelStyle, color: '#000000' }}>Financial Year from</label>
-                      <input type="date" style={inputStyle} defaultValue="2025-04-01" />
-                    </div>
-                    <div>
-                      <label style={{ ...labelStyle, color: '#000000' }}>Books beginning from</label>
-                      <input type="date" style={inputStyle} defaultValue="2025-04-01" />
-                    </div>
-                  </div>
-
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ ...labelStyle, color: '#000000' }}>GSTIN / UIN</label>
-                    <input type="text" style={{ ...inputStyle, textTransform: 'uppercase' }} placeholder="22AAAAA0000A1Z5" />
-                  </div>
-
-                  <div style={{ marginBottom: '15px' }}>
-                    <label style={{ ...labelStyle, color: '#000000' }}>PAN / IT No.</label>
-                    <input type="text" style={{ ...inputStyle, textTransform: 'uppercase' }} placeholder="ABCDE1234F" />
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
+                  <button 
+                    type="submit"
+                    style={{
+                      background: '#efe0ff',
+                      color: '#8F00CC',
+                      padding: '10px 30px',
+                      border: '1px solid #8F00CC',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Accept (Ctrl+A)
+                  </button>
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '20px' }}>
-                <button style={{
-                  background: '#efe0ff',
-                  color: '#8F00CC',
-                  padding: '10px 30px',
-                  border: '1px solid #8F00CC',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}>
-                  Accept (Ctrl+A)
-                </button>
-              </div>
+              </form>
             </div>
           </div>
         );

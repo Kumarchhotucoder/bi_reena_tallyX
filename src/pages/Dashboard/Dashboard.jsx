@@ -8,7 +8,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [openMenus, setOpenMenus] = useState({ coreTransactions: true });
-  const [activeTab, setActiveTab] = useState('DASHBOARD');
+  const [activeTab, setActiveTab] = useState('GATEWAY');
+  const [availableCompanies, setAvailableCompanies] = useState([]);
   const [dashboardData, setDashboardData] = useState({ ledgers: [], stocks: [], vouchers: [] });
   const [metrics, setMetrics] = useState({ receivables: 0, payables: 0, cash: 0, cashIn: 0, cashOut: 0 });
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -16,8 +17,8 @@ const Dashboard = () => {
   const [settingsModalTitle, setSettingsModalTitle] = useState('');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const profileRef = useRef(null);
-  const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: 'My Company' });
+  const storedCompany = localStorage.getItem('tallyx_company_name');
+  const [user, setUser] = useState({ name: 'Admin User', email: 'admin@bireena.com', initials: 'AD', companyName: storedCompany || '' });
 
   // Company Form State
   const [companyForm, setCompanyForm] = useState({
@@ -134,6 +135,23 @@ const Dashboard = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [activeTab, companyForm, voucherForm]); // Added states to dependencies to ensure handlers have latest values
+
+  const fetchCompanies = async () => {
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch('http://localhost:5001/api/companies', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (data.success && data.data) {
+        setAvailableCompanies(data.data);
+      } else if (Array.isArray(data)) {
+        setAvailableCompanies(data);
+      }
+    } catch (err) {
+      console.error("Error fetching companies:", err);
+    }
+  };
 
 
   const toggleTheme = () => setIsDarkMode(!isDarkMode);
@@ -278,6 +296,58 @@ const Dashboard = () => {
 
   const renderReport = () => {
     switch (activeTab) {
+
+      case 'GATEWAY':
+        return (
+          <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh', opacity: 0.5 }}>
+            <img src={logoImage} alt="Logo" style={{ width: '200px', filter: 'grayscale(100%)', marginBottom: '20px' }} />
+            <h2 style={{ fontSize: '24px', letterSpacing: '1px' }}>Welcome to TallyX</h2>
+            <p>Please Select or Create a Company from the Sidebar to begin.</p>
+          </div>
+        );
+
+      case 'SELECT_COMPANY':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '700px', margin: '20px auto', boxSizing: 'border-box' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid rgba(143, 0, 204, 0.2)' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0 }}><i className="fas fa-list"></i> Select Company</h3>
+                <p className="report-subtitle">Choose a company to load</p>
+              </div>
+              <button onClick={() => setActiveTab('GATEWAY')} className="esc-btn"><i className="fas fa-times"></i> Esc: Back</button>
+            </div>
+            <div style={{ padding: '20px', background: 'var(--card-bg)', minHeight: '300px', borderRadius: '8px' }}>
+              {availableCompanies.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {availableCompanies.map(c => (
+                    <div key={c._id || c.id} 
+                      className="company-list-item"
+                      onClick={() => {
+                        localStorage.setItem('tallyx_company_name', c.name);
+                        setUser(prev => ({ ...prev, companyName: c.name, initials: c.name.substring(0, 2).toUpperCase() }));
+                        setActiveTab('DASHBOARD');
+                      }}
+                    >
+                      <div>
+                        <h4 style={{ margin: 0, fontSize: '16px', color: 'var(--text-main)' }}>{c.name}</h4>
+                        <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: 'var(--text-dim)' }}>
+                          FY: {c.fyFrom ? new Date(c.fyFrom).getFullYear() : '2025'} - {c.fyFrom ? new Date(c.fyFrom).getFullYear() + 1 : '2026'}
+                        </p>
+                      </div>
+                      <i className="fas fa-chevron-right" style={{ color: 'var(--text-dim)' }}></i>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '50px 20px', color: 'var(--text-dim)' }}>
+                  <i className="fas fa-folder-open" style={{ fontSize: '40px', marginBottom: '15px', color: 'rgba(255,255,255,0.1)' }}></i>
+                  <p>No companies found. Please create a new company.</p>
+                  <button onClick={() => setActiveTab('COMPANY')} style={{ marginTop: '15px', padding: '10px 20px', background: '#8F00CC', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>Create Company</button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
 
       // --- 🚀 NEW SAANDAR SCREENS (Fixed Alignment & Detailed) ---
 
@@ -503,10 +573,12 @@ const Dashboard = () => {
                           onChange={handleCompanyChange}
                           style={inputStyle}
                         >
+                          <option value="">Select State</option>
                           <option value="Bihar">Bihar</option>
                           <option value="Delhi">Delhi</option>
                           <option value="Maharashtra">Maharashtra</option>
                           <option value="Karnataka">Karnataka</option>
+                          <option value="Chhattisgarh">Chhattisgarh</option>
                         </select>
                       </div>
                       <div>
@@ -1280,28 +1352,46 @@ const Dashboard = () => {
         </div>
 
         <nav className="nav-group">
-          <div className="nav-label">Main</div>
-          <MenuItem icon="fas fa-home" label="Home" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
+          {!user.companyName ? (
+            <>
+              <div className="nav-label">Gateway of TallyX</div>
+              <MenuItem icon="fas fa-list" label="Select Company" active={activeTab === 'SELECT_COMPANY'} onClick={() => { fetchCompanies(); setActiveTab('SELECT_COMPANY'); }} />
+              <MenuItem icon="fas fa-plus-circle" label="Create Company" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
+              <MenuItem icon="fas fa-sync" label="Backup" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
+              <MenuItem icon="fas fa-undo" label="Restore" active={activeTab === 'RESTORE'} onClick={() => alert('Restore action placeholder')} />
+              <MenuItem icon="fas fa-sign-out-alt" label="Quit" onClick={handleLogout} />
+            </>
+          ) : (
+            <>
+              <div className="nav-label">Main</div>
+              <MenuItem icon="fas fa-home" label="Home" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
 
+<<<<<<< HEAD
           <div className="nav-label">Setup & Creation</div>
           <MenuItem icon="fas fa-plus-circle" label="Company Creation" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
           <MenuItem icon="fas fa-book" label="Ledger Creation" active={activeTab === 'LEDGER'} onClick={() => setActiveTab('LEDGER')} />
           <MenuItem icon="fas fa-boxes" label="Stock Entry" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
+=======
+              <div className="nav-label">Setup & Creation</div>
+              <MenuItem icon="fas fa-book" label="Ledger Creation" onClick={() => setActiveTab('LEDGER')} />
+              <MenuItem icon="fas fa-boxes" label="Stock Entry" onClick={() => setActiveTab('STOCK')} />
+>>>>>>> origin/main
 
-          <div className="nav-label">Core Transactions</div>
-          <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
-            <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
-              <i className="fas fa-receipt"></i> Voucher Entry (F7)
-              <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
-            </button>
-            <div className="sub-menu">
-              <button className={`sub-btn ${activeTab === 'JOURNAL' ? 'active' : ''}`} onClick={() => setActiveTab('JOURNAL')}>Journal Entry</button>
-              <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra Entry (F4)</button>
-              <button className={`sub-btn ${activeTab === 'PAYMENT' ? 'active' : ''}`} onClick={() => setActiveTab('PAYMENT')}>Payment (F5)</button>
-              <button className={`sub-btn ${activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => setActiveTab('RECEIPT')}>Receipt (F6)</button>
-            </div>
-          </div>
+              <div className="nav-label">Core Transactions</div>
+              <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
+                <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
+                  <i className="fas fa-receipt"></i> Voucher Entry (F7)
+                  <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
+                </button>
+                <div className="sub-menu">
+                  <button className={`sub-btn ${activeTab === 'JOURNAL' ? 'active' : ''}`} onClick={() => setActiveTab('JOURNAL')}>Journal Entry</button>
+                  <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra Entry (F4)</button>
+                  <button className={`sub-btn ${activeTab === 'PAYMENT' ? 'active' : ''}`} onClick={() => setActiveTab('PAYMENT')}>Payment (F5)</button>
+                  <button className={`sub-btn ${activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => setActiveTab('RECEIPT')}>Receipt (F6)</button>
+                </div>
+              </div>
 
+<<<<<<< HEAD
           <MenuItem icon="fas fa-shopping-cart" label="Sales (F8)" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
           <MenuItem icon="fas fa-shopping-basket" label="Purchase (F9)" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
           <MenuItem icon="fas fa-university" label="Banking" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
@@ -1310,12 +1400,29 @@ const Dashboard = () => {
           <MenuItem icon="fas fa-percentage" label="GST / Taxation" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
           <MenuItem icon="fas fa-chart-line" label="Profit & Loss" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
           <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+=======
+              <MenuItem icon="fas fa-shopping-cart" label="Sales (F8)" onClick={() => setActiveTab('SALES')} />
+              <MenuItem icon="fas fa-shopping-basket" label="Purchase (F9)" onClick={() => setActiveTab('PURCHASE')} />
+              <MenuItem icon="fas fa-university" label="Banking" onClick={() => setActiveTab('BANKING')} />
 
-          <div className="nav-label">Utilities</div>
-          <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
-          <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
-          <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
-          <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
+              <div className="nav-label">Compliance & Reports</div>
+              <MenuItem icon="fas fa-percentage" label="GST / Taxation" onClick={() => setActiveTab('GST')} />
+              <MenuItem icon="fas fa-chart-line" label="Profit & Loss" onClick={() => setActiveTab('PL')} />
+              <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" onClick={() => setActiveTab('BS')} />
+>>>>>>> origin/main
+
+              <div className="nav-label">Utilities</div>
+              <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
+              <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
+              <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+              <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
+              <MenuItem icon="fas fa-sign-out-alt" label="Quit" onClick={() => {
+                localStorage.removeItem('tallyx_company_name');
+                setUser(prev => ({ ...prev, companyName: '' }));
+                setActiveTab('GATEWAY');
+              }} />
+            </>
+          )}
 
           <div style={{
             padding: '24px 25px',
@@ -1336,9 +1443,9 @@ const Dashboard = () => {
                 color: '#fff',
                 fontWeight: '900',
                 boxShadow: '0 4px 12px rgba(143, 0, 204, 0.2)'
-              }}>AD</div>
+              }}>{user.initials}</div>
               <div>
-                <p style={{ fontSize: '13.5px', fontWeight: '800', color: '#000205' }}>Admin User</p>
+                <p style={{ fontSize: '13.5px', fontWeight: '800', color: '#000205' }}>{user.name}</p>
                 <p style={{ fontSize: '11px', color: '#64748b', fontWeight: '600' }}>Standard Edition</p>
               </div>
               <i className="fas fa-sign-out-alt" style={{ marginLeft: 'auto', color: '#8F00CC', cursor: 'pointer', fontSize: '18px' }} onClick={handleLogout}></i>
@@ -1360,7 +1467,7 @@ const Dashboard = () => {
               <span>{isDarkMode ? "Dark Mode" : "Light Mode"}</span>
             </button>
             <div style={{ textAlign: 'right' }}>
-              <p style={{ fontSize: '14px', fontWeight: '800' }}>Manish Pvt Ltd</p>
+              <p style={{ fontSize: '14px', fontWeight: '800' }}>{user.companyName || 'No Company Selected'}</p>
               <p style={{ fontSize: '11px', color: 'var(--accent-green)', fontWeight: '700' }}>FY 2025-26 | Patna</p>
             </div>
             <img src={`https://ui-avatars.com/api/?name=Admin&background=8F00CC&color=fff&bold=true`}

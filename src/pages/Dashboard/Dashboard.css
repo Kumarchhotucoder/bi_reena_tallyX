@@ -1400,3 +1400,44 @@
 .flag-icon {
   margin-right: 6px;
 }
+
+/* Gateway Styles */
+.gateway-btn {
+  width: 100%;
+  padding: 16px 24px;
+  background: var(--hover-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease;
+  display: block;
+}
+
+.gateway-btn:hover {
+  background: rgba(143, 0, 204, 0.05);
+  border-color: #8F00CC;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(143, 0, 204, 0.15);
+  color: #8F00CC;
+}
+
+.company-list-item {
+  padding: 15px 20px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--hover-bg);
+  transition: all 0.2s ease;
+}
+
+.company-list-item:hover {
+  background: rgba(143, 0, 204, 0.08);
+  border-color: #8F00CC;
+}

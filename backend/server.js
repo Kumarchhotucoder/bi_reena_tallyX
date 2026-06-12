@@ -39,15 +39,18 @@ const seedDefaultAdmin = async () => {
         const count = await User.countDocuments();
         if (count === 0) {
             console.log('No users found in database. Seeding default admin user...');
+            const adminEmail = process.env.DEFAULT_ADMIN_EMAIL || 'chhotu6826@gmail.com';
+            const adminPassword = process.env.DEFAULT_ADMIN_PASSWORD || '123456';
+            
             const defaultAdmin = new User({
-                email: 'chhotu6826@gmail.com',
-                password: '123456',
+                email: adminEmail,
+                password: adminPassword,
                 name: 'Chhotu Kumar',
                 companyName: 'Bireena TallyX',
                 role: 'admin'
             });
             await defaultAdmin.save();
-            console.log('Default admin user seeded successfully: chhotu6826@gmail.com / 123456');
+            console.log(`Default admin user seeded successfully: ${adminEmail}`);
         }
         isSeeded = true;
     } catch (err) {

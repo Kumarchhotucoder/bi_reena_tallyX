@@ -8,7 +8,10 @@ const { protect } = require('../middleware/authMiddleware');
 
 // Generate JWT Secret
 const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET || 'bireena_tallyx_secret_key', {
+    if (!process.env.JWT_SECRET) {
+        throw new Error('JWT_SECRET is not defined in the environment variables');
+    }
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
     });
 };

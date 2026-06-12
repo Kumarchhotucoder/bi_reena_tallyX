@@ -13,7 +13,10 @@ const protect = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
 
             // Verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET || 'bireena_tallyx_secret_key');
+            if (!process.env.JWT_SECRET) {
+                return res.status(500).json({ success: false, message: 'Server configuration error: JWT_SECRET is not defined' });
+            }
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
             // Get user from the token (exclude password)
             req.user = await User.findById(decoded.id).select('-password');

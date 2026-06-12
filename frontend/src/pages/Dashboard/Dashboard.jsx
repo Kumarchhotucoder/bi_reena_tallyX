@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './Dashboard.css';
 import logoImage from '../../assets/logo.jpeg';
+import { API_BASE_URL } from '../../config';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [openMenus, setOpenMenus] = useState({ coreTransactions: true, ledgerMasters: false });
+  const [openMenus, setOpenMenus] = useState({ coreTransactions: true, accountsInfo: false, inventoryInfo: false });
   const [activeTab, setActiveTab] = useState('GATEWAY');
   const [availableCompanies, setAvailableCompanies] = useState([]);
   const [dashboardData, setDashboardData] = useState({ ledgers: [], stocks: [], vouchers: [] });
@@ -65,9 +66,9 @@ const Dashboard = () => {
         const token = localStorage.getItem('tallyx_token');
         const headers = { Authorization: `Bearer ${token}` };
         const [lRes, sRes, vRes] = await Promise.all([
-          fetch('http://localhost:5001/api/ledgers', { headers }),
-          fetch('http://localhost:5001/api/stocks', { headers }),
-          fetch('http://localhost:5001/api/vouchers', { headers })
+          fetch(`${API_BASE_URL}/api/ledgers`, { headers }),
+          fetch(`${API_BASE_URL}/api/stocks`, { headers }),
+          fetch(`${API_BASE_URL}/api/vouchers`, { headers })
         ]);
         const ledgers = await lRes.json();
         const stocks = await sRes.json();
@@ -145,19 +146,19 @@ const Dashboard = () => {
       else if (e.altKey && key.toLowerCase() === 'l') { e.preventDefault(); handleLogout(); }
       else if (e.altKey && key.toLowerCase() === 'c') { 
         e.preventDefault(); 
-        setOpenMenus(prev => ({ ...prev, ledgerMasters: true })); 
+        setOpenMenus(prev => ({ ...prev, accountsInfo: true })); 
         setActiveTab('LEDGER'); 
       }
 
       // Contextual Ledger Shortcuts (when Ledger menu is open)
-      if (openMenus.ledgerMasters && !e.ctrlKey && !e.altKey) {
+      if (openMenus.accountsInfo && !e.ctrlKey && !e.altKey) {
         if (key.toLowerCase() === 'c') { setActiveTab('LEDGER'); return; }
         if (key.toLowerCase() === 'd') { setActiveTab('LEDGER_DISPLAY'); return; }
         if (key.toLowerCase() === 'a') { setActiveTab('LEDGER_ALTER'); return; }
         if (key.toLowerCase() === 'r') { setActiveTab('MULTI_LEDGER_CREATE'); return; }
         if (key.toLowerCase() === 'i') { setActiveTab('MULTI_LEDGER_DISPLAY'); return; }
         if (key.toLowerCase() === 'l') { setActiveTab('MULTI_LEDGER_ALTER'); return; }
-        if (key.toLowerCase() === 'q') { setOpenMenus(prev => ({ ...prev, ledgerMasters: false })); return; }
+        if (key.toLowerCase() === 'q') { setOpenMenus(prev => ({ ...prev, accountsInfo: false })); return; }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -167,7 +168,7 @@ const Dashboard = () => {
   const fetchCompanies = async () => {
     try {
       const token = localStorage.getItem('tallyx_token');
-      const response = await fetch('http://localhost:5001/api/companies', {
+      const response = await fetch(`${API_BASE_URL}/api/companies`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
@@ -257,7 +258,7 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('tallyx_token');
-      const response = await fetch('http://localhost:5001/api/companies', {
+      const response = await fetch(`${API_BASE_URL}/api/companies`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -290,7 +291,7 @@ const Dashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem('tallyx_token');
-      const response = await fetch('http://localhost:5001/api/vouchers', {
+      const response = await fetch(`${API_BASE_URL}/api/vouchers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -320,6 +321,85 @@ const Dashboard = () => {
       alert('Error connecting to backend');
     }
 
+  };
+
+  const [stockForm, setStockForm] = useState({
+    name: '',
+    group: 'Primary',
+    uom: 'Nos',
+    hsn: '',
+    taxability: 'Taxable (18%)',
+    costingMethod: 'Average Cost',
+    maintainBatches: 'No',
+    openingQty: '0',
+    openingRate: '0.00',
+    openingValue: '0.00'
+  });
+
+  const handleStockChange = (e) => {
+    const { name, value } = e.target;
+    setStockForm(prev => {
+      const updated = { ...prev, [name]: value };
+      if (name === 'openingQty' || name === 'openingRate') {
+        const qty = parseFloat(updated.openingQty) || 0;
+        const rate = parseFloat(updated.openingRate) || 0;
+        updated.openingValue = (qty * rate).toFixed(2);
+      }
+      return updated;
+    });
+  };
+
+  const handleStockSubmit = async (e) => {
+    if (e) e.preventDefault();
+    try {
+      const token = localStorage.getItem('tallyx_token');
+      const response = await fetch(`${API_BASE_URL}/api/stocks`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          name: stockForm.name,
+          group: stockForm.group,
+          uom: stockForm.uom,
+          hsn: stockForm.hsn,
+          taxability: stockForm.taxability,
+          costingMethod: stockForm.costingMethod,
+          maintainBatches: stockForm.maintainBatches === 'Yes',
+          openingQty: parseFloat(stockForm.openingQty) || 0,
+          openingRate: parseFloat(stockForm.openingRate) || 0,
+          openingValue: parseFloat(stockForm.openingValue) || 0,
+          companyName: user.companyName
+        })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setSuccessMessage(`Stock Item "${stockForm.name}" created successfully!`);
+        setShowSuccessModal(true);
+        setDashboardData(prev => ({
+          ...prev,
+          stocks: [...prev.stocks, data]
+        }));
+        setStockForm({
+          name: '',
+          group: 'Primary',
+          uom: 'Nos',
+          hsn: '',
+          taxability: 'Taxable (18%)',
+          costingMethod: 'Average Cost',
+          maintainBatches: 'No',
+          openingQty: '0',
+          openingRate: '0.00',
+          openingValue: '0.00'
+        });
+      } else {
+        alert(data.message || 'Error creating stock item');
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      alert('Error connecting to backend');
+    }
   };
 
   const renderReport = () => {
@@ -788,12 +868,15 @@ const Dashboard = () => {
 
       case 'STOCK':
         return (
-          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+          <form onSubmit={handleStockSubmit} className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
             <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
                 <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}>Stock Item Creation (Inventory Master)</h3>
               </div>
-              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="submit" style={{ background: '#8F00CC', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Save (Ctrl+A)</button>
+                <button type="button" onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
+              </div>
             </div>
 
             <div style={{ boxSizing: 'border-box', maxWidth: '850px', margin: '0 auto' }}>
@@ -801,32 +884,96 @@ const Dashboard = () => {
 
                 <div>
                   <label style={{ ...labelStyle, color: '#000000' }}>Name of Stock Item</label>
-                  <input ref={stockNameRef} type="text" style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }} placeholder="e.g. Dell Inspiron 15" />
+                  <input
+                    ref={stockNameRef}
+                    type="text"
+                    name="name"
+                    value={stockForm.name}
+                    onChange={handleStockChange}
+                    style={{ ...inputStyle, fontSize: '16px', fontWeight: 'bold' }}
+                    placeholder="e.g. Dell Inspiron 15"
+                    required
+                  />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
                     <label style={{ ...labelStyle, color: '#000000' }}>Under (Category / Group)</label>
-                    <select style={inputStyle}><option>Primary</option><option>Electronics</option></select>
+                    <select
+                      name="group"
+                      value={stockForm.group}
+                      onChange={handleStockChange}
+                      style={inputStyle}
+                    >
+                      <option value="Primary">Primary</option>
+                      <option value="Electronics">Electronics</option>
+                      <option value="Raw Materials">Raw Materials</option>
+                      <option value="Finished Goods">Finished Goods</option>
+                    </select>
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
                     <label style={{ ...labelStyle, color: '#000000' }}>Units of Measure (UOM)</label>
-                    <select style={inputStyle}><option>Nos (Numbers)</option><option>Pcs (Pieces)</option></select>
+                    <select
+                      name="uom"
+                      value={stockForm.uom}
+                      onChange={handleStockChange}
+                      style={inputStyle}
+                    >
+                      <option value="Nos">Nos (Numbers)</option>
+                      <option value="Pcs">Pcs (Pieces)</option>
+                      <option value="Kgs">Kgs (Kilograms)</option>
+                      <option value="Box">Box (Boxes)</option>
+                    </select>
                   </div>
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
                   <div style={{ boxSizing: 'border-box' }}>
                     <label style={{ ...labelStyle, color: '#000000' }}>HSN / SAC Code</label>
-                    <input type="text" style={{ ...inputStyle, marginBottom: '10px' }} placeholder="e.g. 8471" />
+                    <input
+                      type="text"
+                      name="hsn"
+                      value={stockForm.hsn}
+                      onChange={handleStockChange}
+                      style={{ ...inputStyle, marginBottom: '10px' }}
+                      placeholder="e.g. 8471"
+                    />
                     <label style={{ ...labelStyle, color: '#000000' }}>Taxability</label>
-                    <select style={inputStyle}><option>Taxable (18%)</option><option>Exempt</option></select>
+                    <select
+                      name="taxability"
+                      value={stockForm.taxability}
+                      onChange={handleStockChange}
+                      style={inputStyle}
+                    >
+                      <option value="Taxable (18%)">Taxable (18%)</option>
+                      <option value="Taxable (12%)">Taxable (12%)</option>
+                      <option value="Taxable (5%)">Taxable (5%)</option>
+                      <option value="Exempt">Exempt</option>
+                      <option value="Nil Rated">Nil Rated</option>
+                    </select>
                   </div>
                   <div style={{ boxSizing: 'border-box' }}>
                     <label style={{ ...labelStyle, color: '#000000' }}>Costing Method</label>
-                    <select style={{ ...inputStyle, marginBottom: '10px' }}><option>Average Cost</option><option>FIFO</option></select>
+                    <select
+                      name="costingMethod"
+                      value={stockForm.costingMethod}
+                      onChange={handleStockChange}
+                      style={{ ...inputStyle, marginBottom: '10px' }}
+                    >
+                      <option value="Average Cost">Average Cost</option>
+                      <option value="FIFO">FIFO</option>
+                      <option value="LIFO">LIFO</option>
+                    </select>
                     <label style={{ ...labelStyle, color: '#000000' }}>Maintain in Batches?</label>
-                    <select style={inputStyle}><option>No</option><option>Yes</option></select>
+                    <select
+                      name="maintainBatches"
+                      value={stockForm.maintainBatches}
+                      onChange={handleStockChange}
+                      style={inputStyle}
+                    >
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
                   </div>
                 </div>
 
@@ -835,22 +982,44 @@ const Dashboard = () => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', boxSizing: 'border-box' }}>
                     <div style={{ boxSizing: 'border-box' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Quantity</label>
-                      <input type="text" style={{ ...inputStyle, textAlign: 'right' }} placeholder="0" />
+                      <input
+                        type="number"
+                        name="openingQty"
+                        value={stockForm.openingQty}
+                        onChange={handleStockChange}
+                        style={{ ...inputStyle, textAlign: 'right' }}
+                        placeholder="0"
+                      />
                     </div>
                     <div style={{ boxSizing: 'border-box' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Rate (₹)</label>
-                      <input type="text" style={{ ...inputStyle, textAlign: 'right' }} placeholder="0.00" />
+                      <input
+                        type="number"
+                        name="openingRate"
+                        value={stockForm.openingRate}
+                        onChange={handleStockChange}
+                        style={{ ...inputStyle, textAlign: 'right' }}
+                        placeholder="0.00"
+                        step="0.01"
+                      />
                     </div>
                     <div style={{ boxSizing: 'border-box' }}>
                       <label style={{ ...labelStyle, fontSize: '11px' }}>Total Value (₹)</label>
-                      <input type="text" style={{ ...inputStyle, textAlign: 'right', background: 'rgba(0,0,0,0.1)' }} placeholder="0.00" readOnly />
+                      <input
+                        type="text"
+                        name="openingValue"
+                        value={stockForm.openingValue}
+                        style={{ ...inputStyle, textAlign: 'right', background: 'rgba(0,0,0,0.05)' }}
+                        placeholder="0.00"
+                        readOnly
+                      />
                     </div>
                   </div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '30px' }}>
-                <button style={{
+                <button type="submit" style={{
                   background: '#efe0ff',
                   color: '#8F00CC',
                   padding: '10px 30px',
@@ -863,7 +1032,7 @@ const Dashboard = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </form>
         );
 
       case 'PAYMENT':
@@ -1380,6 +1549,426 @@ const Dashboard = () => {
           </div>
         );
 
+      case 'GROUPS':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-folder" style={{ marginRight: '8px' }}></i> List of Groups</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Pre-configured Accounting Groups</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '15px' }}>
+              {[
+                'Sundry Debtors', 'Sundry Creditors', 'Direct Incomes', 'Indirect Incomes', 
+                'Direct Expenses', 'Indirect Expenses', 'Bank Accounts', 'Cash-in-hand', 
+                'Loans & Liabilities', 'Reserves & Surplus', 'Capital Account', 'Fixed Assets', 
+                'Investments', 'Current Assets', 'Current Liabilities'
+              ].map((g, idx) => (
+                <div key={idx} style={{ padding: '15px', background: '#fdfbff', border: '1px solid #efe0ff', borderRadius: '8px', fontWeight: '600', color: '#000205', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <i className="fas fa-folder" style={{ color: '#8F00CC' }}></i>
+                  <span>{g}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'VOUCHER_TYPES':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-file-invoice" style={{ marginRight: '8px' }}></i> Accounting Voucher Types</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Configure numbering and settings for accounting vouchers</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+              <table className="report-table premium-table">
+                <thead>
+                  <tr>
+                    <th>Voucher Type Name</th>
+                    <th>Parent Voucher Type</th>
+                    <th>Numbering Method</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { type: 'Payment', parent: 'Payment', numbering: 'Automatic', status: 'Active' },
+                    { type: 'Receipt', parent: 'Receipt', numbering: 'Automatic', status: 'Active' },
+                    { type: 'Contra', parent: 'Contra', numbering: 'Automatic', status: 'Active' },
+                    { type: 'Journal', parent: 'Journal', numbering: 'Manual', status: 'Active' },
+                    { type: 'Sales', parent: 'Sales', numbering: 'Automatic', status: 'Active' },
+                    { type: 'Purchase', parent: 'Purchase', numbering: 'Automatic', status: 'Active' }
+                  ].map((v, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 'bold', color: '#000000' }}>{v.type}</td>
+                      <td>{v.parent}</td>
+                      <td style={{ color: '#007bff', fontWeight: '600' }}>{v.numbering}</td>
+                      <td><span className="status-pill verified">{v.status}</span></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'STOCK_GROUPS':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-layer-group" style={{ marginRight: '8px' }}></i> Stock Groups</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Inventory Grouping Categories</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '15px' }}>
+              {[
+                { name: 'Primary', count: 12 },
+                { name: 'Electronics', count: 5 },
+                { name: 'Raw Materials', count: 3 },
+                { name: 'Finished Goods', count: 4 },
+                { name: 'Accessories', count: 2 }
+              ].map((sg, idx) => (
+                <div key={idx} style={{ padding: '20px', background: '#fdfbff', border: '1px solid #efe0ff', borderRadius: '10px', color: '#000205', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 'bold' }}>{sg.name}</h4>
+                    <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: 'var(--text-dim)' }}>{sg.count} Stock Items</p>
+                  </div>
+                  <i className="fas fa-boxes" style={{ color: '#8F00CC', fontSize: '20px', opacity: 0.5 }}></i>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 'UOM':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-balance-scale-left" style={{ marginRight: '8px' }}></i> Units of Measure (UOM)</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Standard units for stock verification</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+              <table className="report-table premium-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Formal Name</th>
+                    <th>Number of Decimal Places</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { symbol: 'Nos', name: 'Numbers', decimals: 0 },
+                    { symbol: 'Pcs', name: 'Pieces', decimals: 0 },
+                    { symbol: 'Kgs', name: 'Kilograms', decimals: 3 },
+                    { symbol: 'Box', name: 'Boxes', decimals: 0 },
+                    { symbol: 'Mtr', name: 'Meters', decimals: 2 }
+                  ].map((u, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 'bold', color: '#8F00CC' }}><span className="shortcut-badge" style={{ background: '#efe0ff', color: '#8F00CC', border: '1px solid #efe0ff', margin: 0 }}>{u.symbol}</span></td>
+                      <td style={{ color: '#000000', fontWeight: '600' }}>{u.name}</td>
+                      <td style={{ fontWeight: 'bold', color: '#000000' }}>{u.decimals}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'INV_VOUCHER_TYPES':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-file-invoice" style={{ marginRight: '8px' }}></i> Inventory Voucher Types</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Configure settings for inventory transactions</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ width: '100%', overflowX: 'auto' }}>
+              <table className="report-table premium-table">
+                <thead>
+                  <tr>
+                    <th>Voucher Type Name</th>
+                    <th>Voucher Type Group</th>
+                    <th>Numbering Method</th>
+                    <th>Prevent Duplicates</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { type: 'Physical Stock', group: 'Physical Stock', numbering: 'Automatic', dup: 'Yes' },
+                    { type: 'Delivery Note', group: 'Delivery Note', numbering: 'Automatic', dup: 'Yes' },
+                    { type: 'Receipt Note', group: 'Receipt Note', numbering: 'Automatic', dup: 'Yes' },
+                    { type: 'Stock Journal', group: 'Stock Journal', numbering: 'Automatic', dup: 'Yes' }
+                  ].map((v, idx) => (
+                    <tr key={idx}>
+                      <td style={{ fontWeight: 'bold', color: '#000000' }}>{v.type}</td>
+                      <td>{v.group}</td>
+                      <td style={{ color: '#007bff', fontWeight: '600' }}>{v.numbering}</td>
+                      <td style={{ color: '#28a745', fontWeight: '600' }}>{v.dup}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'INVENTORY_VOUCHERS':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', overflow: 'hidden', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ color: '#8F00CC', fontSize: '20px', margin: '0 0 5px 0', fontWeight: '800' }}><i className="fas fa-warehouse" style={{ marginRight: '8px' }}></i> Inventory Voucher Entry</h3>
+                <span style={{ background: '#8F00CC', color: '#fff', padding: '3px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: 'bold' }}>Alt+F9 : PHYSICAL STOCK</span>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
+            </div>
+
+            <div style={{ boxSizing: 'border-box' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '20px' }}>
+                <div style={{ boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Voucher Type</label>
+                  <select style={inputStyle}>
+                    <option>Physical Stock (Verify Actual Qty)</option>
+                    <option>Delivery Note (Sales Dispatch)</option>
+                    <option>Receipt Note (Purchase Inward)</option>
+                    <option>Stock Journal (Transfer between Godowns)</option>
+                  </select>
+                </div>
+                <div style={{ boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Source Godown (From)</label>
+                  <select style={inputStyle}>
+                    <option>Main Store (Patna)</option>
+                    <option>Warehouse A (Danapur)</option>
+                    <option>Transit Godown</option>
+                  </select>
+                </div>
+                <div style={{ boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Destination Godown (To)</label>
+                  <select style={inputStyle}>
+                    <option>Warehouse A (Danapur)</option>
+                    <option>Main Store (Patna)</option>
+                    <option>Transit Godown</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ width: '100%', overflowX: 'auto', boxSizing: 'border-box', marginBottom: '20px' }}>
+                <table style={voucherTableStyle}>
+                  <thead>
+                    <tr>
+                      <th style={{ ...thStyle, width: '40%' }}>Name of Item</th>
+                      <th style={{ ...thStyle, width: '20%', textAlign: 'right' }}>Quantity</th>
+                      <th style={{ ...thStyle, width: '20%', textAlign: 'right' }}>Rate (₹)</th>
+                      <th style={{ ...thStyle, width: '20%', textAlign: 'right', color: '#8F00CC' }}>Amount (₹)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={tdStyle}><input type="text" style={{ ...inputStyle, border: 'none', background: 'transparent' }} placeholder="Select Item..." /></td>
+                      <td style={tdStyle}><input type="text" style={{ ...inputStyle, textAlign: 'right', border: 'none', background: 'transparent' }} placeholder="0" /></td>
+                      <td style={tdStyle}><input type="text" style={{ ...inputStyle, textAlign: 'right', border: 'none', background: 'transparent' }} placeholder="0.00" /></td>
+                      <td style={tdStyle}><input type="text" style={{ ...inputStyle, textAlign: 'right', border: 'none', background: 'transparent', fontWeight: 'bold' }} placeholder="0.00" readOnly /></td>
+                    </tr>
+                    <tr style={{ background: 'rgba(143,0,204,0.05)' }}>
+                      <td colSpan="3" style={{ ...tdStyle, textAlign: 'right', fontWeight: '900', borderRight: 'none', color: 'var(--text-main)' }}>TOTAL VALUATION</td>
+                      <td style={{ ...tdStyle, textAlign: 'right', fontWeight: '900', fontSize: '18px', color: '#8F00CC' }}>₹ 0.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px', boxSizing: 'border-box' }}>
+                <div style={{ boxSizing: 'border-box' }}>
+                  <label style={{ ...labelStyle, color: '#000000' }}>Narration / Remarks:</label>
+                  <textarea style={{ ...inputStyle, height: '50px', resize: 'none' }} placeholder="Being physical stock verification or transfer completed..."></textarea>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end', boxSizing: 'border-box' }}>
+                  <button style={{
+                    background: '#efe0ff',
+                    color: '#8F00CC',
+                    padding: '10px 30px',
+                    border: '1px solid #8F00CC',
+                    borderRadius: '4px',
+                    cursor: 'pointer',
+                    fontWeight: 'bold'
+                  }}>Save Voucher (Ctrl+A)</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'STOCK_SUMMARY':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-boxes" style={{ marginRight: '8px' }}></i> Stock Summary</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Current Inventory Valuation & Stock Quantities</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px', marginBottom: '20px' }}>
+              <div className="r-card" style={{ borderLeft: '4px solid #8F00CC' }}>
+                <p>Total Stock Items</p>
+                <h4 style={{ color: '#000000' }}>{dashboardData.stocks.length} Items</h4>
+              </div>
+              <div className="r-card" style={{ borderLeft: '4px solid #28a745' }}>
+                <p>Total Stock Value</p>
+                <h4 style={{ color: '#28a745' }}>₹ {dashboardData.stocks.reduce((acc, curr) => acc + (curr.openingValue || 0), 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h4>
+              </div>
+              <div className="r-card" style={{ borderLeft: '4px solid #007bff' }}>
+                <p>Active Categories</p>
+                <h4 style={{ color: '#007bff' }}>{new Set(dashboardData.stocks.map(s => s.group)).size || 1} Categories</h4>
+              </div>
+            </div>
+
+            <div className="table-responsive" style={{ boxSizing: 'border-box' }}>
+              <table className="report-table premium-table">
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>UOM</th>
+                    <th className="num-col">Quantity</th>
+                    <th className="num-col">Average Rate (₹)</th>
+                    <th className="num-col">Valuation (₹)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dashboardData.stocks.length > 0 ? (
+                    dashboardData.stocks.map((item, idx) => (
+                      <tr key={idx}>
+                        <td style={{ fontWeight: 'bold', color: '#000000' }}>{item.name}</td>
+                        <td>{item.group}</td>
+                        <td><span className="shortcut-badge sm" style={{ background: '#efe0ff', color: '#8F00CC', border: '1px solid #efe0ff' }}>{item.uom}</span></td>
+                        <td className="num-col" style={{ color: '#000000' }}>{item.openingQty || 0}</td>
+                        <td className="num-col" style={{ color: '#000000' }}>{(item.openingRate || 0).toFixed(2)}</td>
+                        <td className="num-col highlight" style={{ color: '#8F00CC', fontWeight: 'bold' }}>₹ {(item.openingValue || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" style={{ textAlign: 'center', padding: '30px', color: 'var(--text-dim)' }}>No Stock Items found in database. Use Inventory Info to add stock items.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        );
+
+      case 'RATIO_ANALYSIS':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '100%', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-chart-pie" style={{ marginRight: '8px' }}></i> Ratio Analysis</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Key Financial Indicators & Business Ratios</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Back</button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '25px', boxSizing: 'border-box' }}>
+              <div style={{ padding: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <h4 style={{ color: '#8F00CC', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>Liquidity & Working Capital Ratios</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Current Ratio</span>
+                    <span style={{ color: '#28a745', fontWeight: '800' }}>1.85 : 1 (Healthy)</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Quick / Acid Test Ratio</span>
+                    <span style={{ color: '#007bff', fontWeight: '800' }}>1.45 : 1</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Debt Equity Ratio</span>
+                    <span style={{ color: '#dc3545', fontWeight: '800' }}>0.35 : 1</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Proprietary Ratio</span>
+                    <span style={{ color: '#4b5563', fontWeight: '800' }}>0.74 : 1</span>
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ padding: '20px', background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <h4 style={{ color: '#8F00CC', fontSize: '16px', fontWeight: 'bold', marginBottom: '15px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>Profitability & Turnover Ratios</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Gross Profit Percentage (%)</span>
+                    <span style={{ color: '#28a745', fontWeight: '800' }}>24.50 %</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Net Profit Percentage (%)</span>
+                    <span style={{ color: '#007bff', fontWeight: '800' }}>12.80 %</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px dashed #e2e8f0', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Inventory Turnover Ratio</span>
+                    <span style={{ color: '#e3b341', fontWeight: '800' }}>6.42 times</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '6px' }}>
+                    <span style={{ fontWeight: 'bold', color: '#000000' }}>Return on Investment (ROI)</span>
+                    <span style={{ color: '#8F00CC', fontWeight: '800' }}>16.80 %</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'DISPLAY_MENU':
+        return (
+          <div className="report-card animate-fade" style={{ gridColumn: '1 / -1', maxWidth: '800px', margin: '20px auto', boxSizing: 'border-box', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '10px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', padding: '25px' }}>
+            <div className="report-header" style={{ borderBottom: '1px solid #e2e8f0', paddingBottom: '15px', marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h3 style={{ fontSize: '20px', color: '#8F00CC', margin: 0, fontWeight: '800' }}><i className="fas fa-folder-open" style={{ marginRight: '8px' }}></i> Display Menu</h3>
+                <p style={{ margin: '5px 0 0 0', color: '#636c76', fontSize: '13px' }}>Gateway of Tally > Display More Reports</p>
+              </div>
+              <button onClick={() => setActiveTab('DASHBOARD')} style={{ background: '#cc0000', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px' }}>Esc: Quit</button>
+            </div>
+
+            <div style={{ boxSizing: 'border-box' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ padding: '8px 15px', fontSize: '11px', fontWeight: '800', color: '#8F00CC', textTransform: 'uppercase', letterSpacing: '1.5px', background: '#fdfbff', borderRadius: '4px' }}>Accounting Reports</div>
+                  <div onClick={() => setActiveTab('BS')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Trial Balance</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('DASHBOARD')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Day Book</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('DASHBOARD')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Cash / Bank Book</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('GST')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>GST Reports / GSTR-1</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ padding: '8px 15px', fontSize: '11px', fontWeight: '800', color: '#8F00CC', textTransform: 'uppercase', letterSpacing: '1.5px', background: '#fdfbff', borderRadius: '4px' }}>Inventory & Statements</div>
+                  <div onClick={() => setActiveTab('STOCK_SUMMARY')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Stock Summary</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('RATIO_ANALYSIS')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Ratio Analysis</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('PRINT')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Print & Export Setup</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                  <div onClick={() => setActiveTab('BACKUP')} className="company-list-item" style={{ padding: '12px 18px', cursor: 'pointer' }}><span>Backup Configuration</span><i className="fas fa-chevron-right" style={{ fontSize: '12px' }}></i></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
 
       default: return null;
     }
@@ -1408,52 +1997,63 @@ const Dashboard = () => {
               <div className="nav-label">Main</div>
               <MenuItem icon="fas fa-home" label="Home" active={activeTab === 'DASHBOARD'} onClick={() => setActiveTab('DASHBOARD')} />
 
-              <div className="nav-label">Setup & Creation</div>
-              <MenuItem icon="fas fa-plus-circle" label="Company Creation" active={activeTab === 'COMPANY'} onClick={() => setActiveTab('COMPANY')} />
+              <div className="nav-label">Master</div>
               
-              <div className={`menu-item ${openMenus.ledgerMasters ? 'open' : ''}`}>
+              <div className={`menu-item ${openMenus.accountsInfo ? 'open' : ''}`}>
                 <button 
-                  className={`nav-btn ${activeTab.includes('LEDGER') ? 'active' : ''}`} 
-                  onClick={() => toggleMenu('ledgerMasters')}
+                  className={`nav-btn ${['GROUPS', 'LEDGER', 'VOUCHER_TYPES'].includes(activeTab) ? 'active' : ''}`} 
+                  onClick={() => toggleMenu('accountsInfo')}
                 >
-                  <i className="fas fa-book"></i> Ledger Creation
-                  <i className={`fas fa-chevron-${openMenus.ledgerMasters ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
+                  <i className="fas fa-book"></i> Accounts Info
+                  <i className={`fas fa-chevron-${openMenus.accountsInfo ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
                 </button>
                 <div className="sub-menu">
-                  <div style={{ padding: '8px 15px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Single Ledger</div>
+                  <button className={`sub-btn ${activeTab === 'GROUPS' ? 'active' : ''}`} onClick={() => setActiveTab('GROUPS')}>
+                    Groups
+                  </button>
                   <button className={`sub-btn ${activeTab === 'LEDGER' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER')}>
-                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>C</span>reate
+                    Ledgers
                   </button>
-                  <button className={`sub-btn ${activeTab === 'LEDGER_DISPLAY' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER_DISPLAY')}>
-                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>D</span>isplay
+                  <button className={`sub-btn ${activeTab === 'VOUCHER_TYPES' ? 'active' : ''}`} onClick={() => setActiveTab('VOUCHER_TYPES')}>
+                    Voucher Type
                   </button>
-                  <button className={`sub-btn ${activeTab === 'LEDGER_ALTER' ? 'active' : ''}`} onClick={() => setActiveTab('LEDGER_ALTER')}>
-                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>A</span>lter
-                  </button>
-
-                  <div style={{ padding: '12px 15px 8px 15px', fontSize: '11px', fontWeight: 'bold', color: 'var(--text-dim)', textTransform: 'uppercase', letterSpacing: '1px' }}>Multiple Ledgers</div>
-                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_CREATE' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_CREATE')}>
-                    C<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>R</span>eate
-                  </button>
-                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_DISPLAY' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_DISPLAY')}>
-                    D<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>I</span>splay
-                  </button>
-                  <button className={`sub-btn ${activeTab === 'MULTI_LEDGER_ALTER' ? 'active' : ''}`} onClick={() => setActiveTab('MULTI_LEDGER_ALTER')}>
-                    A<span style={{ color: '#8F00CC', fontWeight: 'bold' }}>L</span>Ter
-                  </button>
-                  
-                  <button className="sub-btn" onClick={() => toggleMenu('ledgerMasters')} style={{ marginTop: '5px', borderTop: '1px solid rgba(143, 0, 204, 0.05)' }}>
-                    <span style={{ color: '#8F00CC', fontWeight: 'bold' }}>Q</span>uit
+                  <button className="sub-btn" onClick={() => setOpenMenus(prev => ({ ...prev, accountsInfo: false }))} style={{ marginTop: '5px', borderTop: '1px solid rgba(143, 0, 204, 0.05)' }}>
+                    Quit
                   </button>
                 </div>
               </div>
               
-              <MenuItem icon="fas fa-boxes" label="Stock Entry" active={activeTab === 'STOCK'} onClick={() => setActiveTab('STOCK')} />
+              <div className={`menu-item ${openMenus.inventoryInfo ? 'open' : ''}`}>
+                <button 
+                  className={`nav-btn ${['STOCK_GROUPS', 'STOCK', 'UOM', 'INV_VOUCHER_TYPES'].includes(activeTab) ? 'active' : ''}`} 
+                  onClick={() => toggleMenu('inventoryInfo')}
+                >
+                  <i className="fas fa-boxes"></i> Inventory Info
+                  <i className={`fas fa-chevron-${openMenus.inventoryInfo ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
+                </button>
+                <div className="sub-menu">
+                  <button className={`sub-btn ${activeTab === 'STOCK_GROUPS' ? 'active' : ''}`} onClick={() => setActiveTab('STOCK_GROUPS')}>
+                    Stock Groups
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'STOCK' ? 'active' : ''}`} onClick={() => setActiveTab('STOCK')}>
+                    Stock Items
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'UOM' ? 'active' : ''}`} onClick={() => setActiveTab('UOM')}>
+                    Units of Measures
+                  </button>
+                  <button className={`sub-btn ${activeTab === 'INV_VOUCHER_TYPES' ? 'active' : ''}`} onClick={() => setActiveTab('INV_VOUCHER_TYPES')}>
+                    Vouchers Types
+                  </button>
+                  <button className="sub-btn" onClick={() => setOpenMenus(prev => ({ ...prev, inventoryInfo: false }))} style={{ marginTop: '5px', borderTop: '1px solid rgba(143, 0, 204, 0.05)' }}>
+                    Quit
+                  </button>
+                </div>
+              </div>
 
-              <div className="nav-label">Core Transactions</div>
+              <div className="nav-label">Transactions</div>
               <div className={`menu-item ${openMenus.coreTransactions ? 'open' : ''}`}>
-                <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
-                  <i className="fas fa-receipt"></i> Voucher Entry (F7)
+                <button className={`nav-btn ${['JOURNAL', 'CONTRA', 'PAYMENT', 'RECEIPT', 'SALES', 'PURCHASE'].includes(activeTab) ? 'active' : ''}`} onClick={() => toggleMenu('coreTransactions')}>
+                  <i className="fas fa-receipt"></i> Accounting Vouchers
                   <i className={`fas fa-chevron-${openMenus.coreTransactions ? 'up' : 'down'}`} style={{ marginLeft: 'auto', fontSize: '10px' }}></i>
                 </button>
                 <div className="sub-menu">
@@ -1461,23 +2061,23 @@ const Dashboard = () => {
                   <button className={`sub-btn ${activeTab === 'CONTRA' ? 'active' : ''}`} onClick={() => setActiveTab('CONTRA')}>Contra Entry (F4)</button>
                   <button className={`sub-btn ${activeTab === 'PAYMENT' ? 'active' : ''}`} onClick={() => setActiveTab('PAYMENT')}>Payment (F5)</button>
                   <button className={`sub-btn ${activeTab === 'RECEIPT' ? 'active' : ''}`} onClick={() => setActiveTab('RECEIPT')}>Receipt (F6)</button>
+                  <button className={`sub-btn ${activeTab === 'SALES' ? 'active' : ''}`} onClick={() => setActiveTab('SALES')}>Sales (F8)</button>
+                  <button className={`sub-btn ${activeTab === 'PURCHASE' ? 'active' : ''}`} onClick={() => setActiveTab('PURCHASE')}>Purchase (F9)</button>
                 </div>
               </div>
 
-              <MenuItem icon="fas fa-shopping-cart" label="Sales (F8)" active={activeTab === 'SALES'} onClick={() => setActiveTab('SALES')} />
-              <MenuItem icon="fas fa-shopping-basket" label="Purchase (F9)" active={activeTab === 'PURCHASE'} onClick={() => setActiveTab('PURCHASE')} />
-              <MenuItem icon="fas fa-university" label="Banking" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
-
-              <div className="nav-label">Compliance & Reports</div>
-              <MenuItem icon="fas fa-percentage" label="GST / Taxation" active={activeTab === 'GST'} onClick={() => setActiveTab('GST')} />
-              <MenuItem icon="fas fa-chart-line" label="Profit & Loss" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
-              <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+              <MenuItem icon="fas fa-dolly" label="Inventory Vouchers" active={activeTab === 'INVENTORY_VOUCHERS'} onClick={() => setActiveTab('INVENTORY_VOUCHERS')} />
 
               <div className="nav-label">Utilities</div>
-              <MenuItem icon="fas fa-print" label="Printing & Export" shortcut="Alt+R" active={activeTab === 'PRINT'} onClick={() => setActiveTab('PRINT')} />
-              <MenuItem icon="fas fa-sync" label="Backup & Restore" shortcut="Alt+K" active={activeTab === 'BACKUP'} onClick={() => setActiveTab('BACKUP')} />
-              <MenuItem icon="fas fa-file-import" label="Import & Export" shortcut="Alt+I" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
-              <MenuItem icon="fas fa-user-circle" label="My Profile" shortcut="Alt+U" active={activeTab === 'PROFILE'} onClick={() => setActiveTab('PROFILE')} />
+              <MenuItem icon="fas fa-file-import" label="Import Data" active={activeTab === 'IMPORT'} onClick={() => setActiveTab('IMPORT')} />
+              <MenuItem icon="fas fa-university" label="Banking" active={activeTab === 'BANKING'} onClick={() => setActiveTab('BANKING')} />
+
+              <div className="nav-label">Reports</div>
+              <MenuItem icon="fas fa-balance-scale" label="Balance Sheet" active={activeTab === 'BS'} onClick={() => setActiveTab('BS')} />
+              <MenuItem icon="fas fa-chart-line" label="Profit & Loss A/C" active={activeTab === 'PL'} onClick={() => setActiveTab('PL')} />
+              <MenuItem icon="fas fa-box-open" label="Stock Summary" active={activeTab === 'STOCK_SUMMARY'} onClick={() => setActiveTab('STOCK_SUMMARY')} />
+              <MenuItem icon="fas fa-percent" label="Ratio Analysis" active={activeTab === 'RATIO_ANALYSIS'} onClick={() => setActiveTab('RATIO_ANALYSIS')} />
+              <MenuItem icon="fas fa-folder-open" label="Display" active={activeTab === 'DISPLAY_MENU'} onClick={() => setActiveTab('DISPLAY_MENU')} />
               <MenuItem icon="fas fa-sign-out-alt" label="Quit" onClick={() => {
                 localStorage.removeItem('tallyx_company_name');
                 setUser(prev => ({ ...prev, companyName: '' }));
@@ -1684,7 +2284,7 @@ const Dashboard = () => {
         alignItems: 'center',
         boxShadow: '0 10px 40px rgba(143, 0, 204, 0.12)',
         zIndex: 1000,
-        opacity: activeTab === 'DASHBOARD' && !openMenus.ledgerMasters ? 0.3 : 1,
+        opacity: activeTab === 'DASHBOARD' && !openMenus.accountsInfo ? 0.3 : 1,
         transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
         pointerEvents: 'none'
       }}>
@@ -1695,7 +2295,7 @@ const Dashboard = () => {
         <div style={{ height: '20px', width: '1px', background: 'rgba(143, 0, 204, 0.2)' }}></div>
 
         <div style={{ display: 'flex', gap: '15px' }}>
-          {openMenus.ledgerMasters ? (
+          {openMenus.accountsInfo ? (
             <>
               <HUDKey k="C" label="Create" />
               <HUDKey k="D" label="Display" />

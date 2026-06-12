@@ -4,6 +4,7 @@ import { X, Building2, User, Mail, Lock, Sparkles, ArrowRight, CheckCircle, Eye,
 import toast from 'react-hot-toast';
 import logoImage from '../assets/logo.jpeg';
 import './TrialModal.css';
+import { API_BASE_URL } from '../config';
 
 const TrialModal = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -47,7 +48,7 @@ const TrialModal = () => {
         try {
             const countryCode = formData.get('countryCode');
             const mobile = formData.get('mobile');
-            const response = await fetch('http://localhost:5001/api/', { // matches router.post('/') in userRoutes.js
+            const response = await fetch(`${API_BASE_URL}/api/`, { // matches router.post('/') in userRoutes.js
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

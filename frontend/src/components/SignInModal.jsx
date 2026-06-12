@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Mail, Lock, LogIn, Eye, EyeOff, Shield, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import './SignInModal.css';
+import { API_BASE_URL } from '../config';
 
 const SignInModal = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +39,7 @@ const SignInModal = () => {
         setError('');
 
         try {
-            const response = await fetch('http://localhost:5001/api/login', {
+            const response = await fetch(`${API_BASE_URL}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -31,12 +31,12 @@ router.post('/login', async (req, res) => {
 
         if (email === defaultEmail && password === defaultPassword) {
             const secret = process.env.JWT_SECRET || 'bireena_tallyx_secret_key';
-            const mockToken = jwt.sign({ id: 'mock_admin_id' }, secret, {
+            const mockToken = jwt.sign({ id: '000000000000000000000001' }, secret, {
                 expiresIn: '30d',
             });
             return res.json({
                 success: true,
-                _id: 'mock_admin_id',
+                _id: '000000000000000000000001',
                 name: 'Demo Admin User',
                 email: email,
                 role: 'admin',

@@ -16,9 +16,9 @@ const protect = async (req, res, next) => {
             const secret = process.env.JWT_SECRET || 'bireena_tallyx_secret_key';
             const decoded = jwt.verify(token, secret);
 
-            if (decoded.id === 'mock_admin_id') {
+            if (decoded.id === '000000000000000000000001') {
                 req.user = {
-                    _id: 'mock_admin_id',
+                    _id: '000000000000000000000001',
                     name: 'Demo Admin User',
                     email: process.env.DEFAULT_ADMIN_EMAIL || 'chhotu6826@gmail.com',
                     role: 'admin',

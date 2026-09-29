@@ -2885,14 +2885,14 @@
     gap: 12px !important;
   }
 
-  /* Touch-Friendly Form Controls (Min 44px) */
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  input[type="email"],
-  input[type="password"],
-  select,
-  textarea {
+  /* Touch-Friendly Form Controls (Min 44px) inside Dashboard */
+  .app-wrapper input[type="text"],
+  .app-wrapper input[type="number"],
+  .app-wrapper input[type="date"],
+  .app-wrapper input[type="email"],
+  .app-wrapper input[type="password"],
+  .app-wrapper select,
+  .app-wrapper textarea {
     min-height: 44px !important;
     font-size: 16px !important; /* Prevents auto-zoom on mobile safari */
     border-radius: 8px !important;
@@ -2917,9 +2917,9 @@
     width: auto !important;
   }
 
-  /* Form Action Submit Buttons */
-  button[type="submit"],
-  .save-action-btn {
+  /* Form Action Submit Buttons inside Dashboard */
+  .app-wrapper button[type="submit"],
+  .app-wrapper .save-action-btn {
     min-height: 44px !important;
     padding: 10px 20px !important;
     font-size: 14px !important;

@@ -112,8 +112,10 @@ const SignInModal = () => {
                 <form className="signin-v2-form" onSubmit={handleSubmit}>
                     <div className="signin-v2-field">
                         <label>Email Address</label>
-                        <div className="input-group">
-                            <Mail className="input-icon" size={20} />
+                        <div className="signin-v2-input-group input-group">
+                            <span className="signin-v2-input-icon input-icon">
+                                <Mail size={20} />
+                            </span>
                             <input
                                 type="email"
                                 placeholder="Enter your email"
@@ -126,8 +128,10 @@ const SignInModal = () => {
 
                     <div className="signin-v2-field">
                         <label>Password</label>
-                        <div className="input-group">
-                            <Lock className="input-icon" size={20} />
+                        <div className="signin-v2-input-group input-group">
+                            <span className="signin-v2-input-icon input-icon">
+                                <Lock size={20} />
+                            </span>
                             <input
                                 type={showPassword ? "text" : "password"}
                                 placeholder="Enter your password"
@@ -137,8 +141,9 @@ const SignInModal = () => {
                             />
                             <button 
                                 type="button" 
-                                className="password-toggle"
+                                className="signin-v2-password-toggle password-toggle"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label="Toggle password visibility"
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                             </button>
